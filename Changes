@@ -2,6 +2,11 @@ Revision history for Metabase-Fact
 
 {{$NEXT}}
 
+  - Ensure metabase-profile gets installed (it was lost due to a stale
+    dist.ini)
+
+  - Make use of utf8::encode/decode conditional on 5.008
+
 0.013     2010-04-19 20:49:18 EST5EDT
 
   - Weaken validation of keys in Metabase::Fact::Hash.  They must exist,
