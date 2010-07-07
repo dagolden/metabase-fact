@@ -2,6 +2,8 @@ Revision history for Metabase-Fact
 
 {{$NEXT}}
 
+0.014     2010-07-07 11:45:42 EST5EDT
+
   - Ensure metabase-profile gets installed (it was lost due to a stale
     dist.ini)
 
