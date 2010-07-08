@@ -2,6 +2,8 @@ Revision history for Metabase-Fact
 
 {{$NEXT}}
 
+0.016     2010-07-07 22:03:14 EST5EDT
+
   - Removing 'use base' throughout to attempt to squash some heisenbugs
 
 0.015     2010-07-07 11:49:30 EST5EDT
