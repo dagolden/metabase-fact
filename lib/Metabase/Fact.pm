@@ -375,7 +375,8 @@ __END__
 
   # defining the fact class
   package MyFact;
-  use base 'Metabase::Fact::Hash';
+  use Metabase::Fact::Hash;
+  our @ISA = qw/Metabase::Fact::Hash/;
 
   # using the fact class
   my $fact = TestReport->new(

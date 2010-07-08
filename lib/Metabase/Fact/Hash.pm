@@ -7,7 +7,8 @@ package Metabase::Fact::Hash;
 use Carp ();
 use JSON 2 ();
 
-use base 'Metabase::Fact';
+use Metabase::Fact;
+our @ISA = qw/Metabase::Fact/;
 
 sub validate_content {
   my ($self) = @_;
@@ -45,7 +46,8 @@ __END__
 
   # defining the fact class
   package MyComment;
-  use base 'Metabase::Fact::Hash';
+  use Metabase::Fact::Hash;
+  our @ISA = qw/Metabase::Fact::Hash/;
 
   sub required_keys { qw/poster/ }
 

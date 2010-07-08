@@ -6,7 +6,8 @@ package Metabase::Fact::String;
 
 use Carp ();
 
-use base 'Metabase::Fact';
+use Metabase::Fact;
+our @ISA = qw/Metabase::Fact/;
 
 # document that content must be characters, not bytes -- dagolden, 2009-03-28 
 
@@ -37,7 +38,8 @@ __END__
 
   # defining the fact class
   package MyFact;
-  use base 'Metabase::Fact::String';
+  use Metabase::Fact::String;
+  our @ISA = qw/Metabase::Fact::String/;
 
   sub content_metadata {
     my $self = shift;

@@ -7,7 +7,8 @@ package Metabase::Resource::cpan;
 use Carp ();
 use CPAN::DistnameInfo ();
 
-use base 'Metabase::Resource';
+use Metabase::Resource;
+our @ISA = qw/Metabase::Resource/;
 
 sub _init {
   my ($self) = @_;

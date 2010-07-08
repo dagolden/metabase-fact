@@ -6,7 +6,8 @@ package Metabase::Resource::perl::commit;
 
 use Carp ();
 
-use base 'Metabase::Resource::perl';
+use Metabase::Resource::perl;
+our @ISA = qw/Metabase::Resource::perl/;
 
 my %metadata_types = (
   sha1          => '//str',

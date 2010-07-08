@@ -7,7 +7,8 @@ package Metabase::Resource::cpan::distfile;
 use Carp ();
 use CPAN::DistnameInfo ();
 
-use base 'Metabase::Resource::cpan';
+use Metabase::Resource::cpan;
+our @ISA = qw/Metabase::Resource::cpan/;
 
 my %metadata_types = (
   cpan_id       => '//str',

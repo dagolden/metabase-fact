@@ -6,7 +6,8 @@ package Metabase::Resource::metabase;
 
 use Carp ();
 
-use base 'Metabase::Resource';
+use Metabase::Resource;
+our @ISA = qw/Metabase::Resource/;
 
 my $hex = '[0-9a-f]';
 my $guid_re = qr(\A$hex{8}-$hex{4}-$hex{4}-$hex{4}-$hex{12}\z)i;

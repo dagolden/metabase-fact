@@ -7,7 +7,8 @@ package Metabase::Report;
 use Carp ();
 use JSON 2 ();
 
-use base 'Metabase::Fact';
+use Metabase::Fact;
+our @ISA = qw/Metabase::Fact/;
 
 #--------------------------------------------------------------------------#
 # abstract methods -- fatal
@@ -216,7 +217,8 @@ __END__
 
   package MyReport;
 
-  use base 'Metabase::Report';
+  use Metabase::Report;
+  our @ISA = qw/Metabase::Report/;
   __PACKAGE__->load_fact_classes;
 
   sub report_spec {

@@ -6,7 +6,8 @@ package Metabase::Resource::perl;
 
 use Carp ();
 
-use base 'Metabase::Resource';
+use Metabase::Resource;
+our @ISA = qw/Metabase::Resource/;
 
 sub _init {
   my ($self) = @_;

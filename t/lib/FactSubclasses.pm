@@ -16,7 +16,7 @@ sub content_as_bytes    { return reverse($_[0]->{content})  };
 sub content_from_bytes  { return reverse($_[1])             };
 
 package FactThree;
-use base 'Metabase::Fact::String';
+our @ISA = ('Metabase::Fact::String');
 sub validate_content    { 
   $_[0]->SUPER::validate_content;
   die "content not positive length" unless length $_[0]->content > 0;
@@ -26,7 +26,7 @@ sub content_metadata    {
 }
 
 package FactFour;
-use base 'Metabase::Fact::Hash';
+our @ISA = ('Metabase::Fact::Hash');
 sub required_keys {qw/ first /};
 sub optional_keys {qw/ second /};
 sub content_metadata    { 

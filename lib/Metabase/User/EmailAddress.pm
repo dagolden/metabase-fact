@@ -4,7 +4,8 @@ use warnings;
 package Metabase::User::EmailAddress;
 # ABSTRACT: Metabase fact for user email address
 
-use base 'Metabase::Fact::String';
+use Metabase::Fact::String;
+our @ISA = qw/Metabase::Fact::String/;
   
 1;
 
