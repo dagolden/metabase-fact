@@ -2,6 +2,8 @@ Revision history for Metabase-Fact
 
 {{$NEXT}}
 
+0.017     2010-08-14 16:08:05 EST5EDT
+
   - Refactor save() and load() to use new as_json() and to_json() method.
     Persistence is now possible to/from file, string, or unblessed
     data structure.
