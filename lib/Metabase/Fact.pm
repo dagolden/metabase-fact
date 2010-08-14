@@ -220,6 +220,15 @@ sub resource_metadata_types {
 
 # persistence routines
 
+# Class might not be in its own file -- check if method can resolve
+# or else try to load it
+sub _load_fact_class {
+  my ($class, $fact_class) = @_;
+  return unless defined $fact_class;
+  return 1 if $fact_class->can('type');
+  return eval "require $fact_class; 1";
+}
+
 sub as_struct {
   my ($self) = @_;
 
@@ -243,21 +252,26 @@ sub as_struct {
 
 sub from_struct {
   my ($class, $struct) = @_;
+
+  # Might be called as Metabase::Fact->from_struct($struct), so we
+  # need to find and load the actual fact class
+  my $fact_class = $class->class_from_type($struct->{metadata}{core}{type});
+  $class->_load_fact_class( $fact_class )
+    or Carp::confess "Could not find $fact_class to thaw a fact" .
+    ( $@ ? ": $@" : "" );
+
   my $metadata  = $struct->{metadata};
   my $core_meta = $metadata->{core};
-
-  Carp::confess("invalid fact type: $core_meta->{type}")
-    unless $class->type eq $core_meta->{type};
 
   # transfrom struct into content and core metadata arguments the way they
   # would be given to new, then validate these and get an object from
   # _init_guts
   my @args = (
     (map { $_ => $core_meta->{$_} } keys %$core_meta),
-    content  => $class->content_from_bytes($struct->{content}),
+    content  => $fact_class->content_from_bytes($struct->{content}),
   );
 
-  my $args = $class->__validate_args(
+  my $args = $fact_class->__validate_args(
     \@args,
     {
       # when thawing, all of these must be provided
@@ -274,9 +288,20 @@ sub from_struct {
     },
   );
 
-  my $self = $class->_init_guts($args);
+  my $self = $fact_class->_init_guts($args);
 
   return $self;
+}
+
+sub as_json {
+  my ($self) = @_;
+  return JSON->new->ascii->encode( $self->as_struct );
+}
+
+sub from_json {
+  my ($class, $string) = @_;
+  my $struct = eval { JSON->new->ascii->decode( $string ) };
+  return $class->from_struct( $struct );
 }
 
 sub save {
@@ -284,9 +309,18 @@ sub save {
   my $class = ref($self);
   open my $fh, ">", $filename
     or Carp::confess "Error saving $class to '$filename'\: $!";
-  print {$fh} JSON->new->ascii->encode( $self->as_struct );
+  print {$fh} scalar $self->as_json;
   close $fh;
   return 1;
+}
+
+sub load {
+  my ($class, $filename) = @_;
+  open my $fh, "<", $filename
+    or Carp::confess "Error loading fact from '$filename'\: $!";
+  my $string = do { local $/; <$fh> };
+  close $fh;
+  return $class->from_json($string);
 }
 
 #--------------------------------------------------------------------------#
@@ -322,19 +356,6 @@ sub class_from_type {
 # XXX should this be a fatal abstract?  Forcing classes to be
 # explicit about schema versions? Annoying, but correct -- dagolden, 2009-03-31
 sub default_schema_version() { 1 }
-
-sub load {
-  my ($self, $filename) = @_;
-  open my $fh, "<", $filename
-    or Carp::confess "Error loading fact from '$filename'\: $!";
-  my $string = do { local $/; <$fh> };
-  close $fh;
-  my $json = JSON->new->ascii->decode( $string );
-  my $class = $self->class_from_type($json->{metadata}{core}{type});
-  eval "require $class; 1"
-    or Carp::confess "Could not find $class to restore '$filename': $@";
-  return $class->from_struct( $json );
-}
 
 #--------------------------------------------------------------------------#
 # abstract methods -- mostly fatal
@@ -528,7 +549,7 @@ to true.  The C<set_valid> method may be called to change the C<valid>
 property, for example, to mark a fact invalid rather than deleting it.  The
 value of C<valid> is always normalized to return "1" for true and "0" for false.
 
-=head1 METHODS
+=head1 CONSTRUCTOR
 
 =head2 new
 
@@ -554,20 +575,6 @@ The C<type> accessor may also be called as a class method.
 
 A utility function to invert the operation of the C<type> method.
 
-=head2 load
-
-  my $fact = MyFact->load($filename);
-
-This method loads a fact from a JSON format file and returns it.  If the
-file cannot be read or is not valid JSON, and exception is thrown
-
-=head2 from_struct
-
-  my $fact = MyFact->from_struct( $struct );
-
-This takes the output of the C<as_struct> method and reconstitutes a Fact
-object.
-
 =head2 upgrade_fact
 
   MyFact->upgrade_fact( $struct );
@@ -588,16 +595,55 @@ Schema version numbers should be monotonically-increasing integers.  The
 default schema version is used to set an objects schema_version attribution
 on creation.
 
-=head1 OBJECT METHODS
+=head1 PERSISTANCE METHODS
 
 The following methods are implemented by Metabase::Fact and subclasses
 generally should not need to override them.
+
+=head2 save
+
+  $fact->save($filename);
+
+This method writes out the fact to a file in JSON format.  If the file cannot
+be written, an exception is raised.  If the save is successful, a true value is
+returned.  Internally, it calls C<as_json>.
+
+=head2 load
+
+  my $fact = Metabase::Fact->load($filename);
+
+This method loads a fact from a JSON format file and returns it.  If the
+file cannot be read or is not valid JSON, and exception is thrown.
+Internally, it calls C<from_json>.
+
+=head2 as_json
+
+This returns a JSON string containing the serialized object.  Internally, it
+calls C<as_struct>.
+
+=head2 from_json
+
+This method regenerates a fact from a JSON string generated by
+C<as_json>.  Internally, it calls C<from_struct>.
 
 =head2 as_struct
 
 This returns a simple data structure that represents the fact and can be used
 for transmission over the wire.  It serializes the content and core metadata,
 but not other metadata, which should be recomputed by the receiving end.
+
+=head2 from_struct
+
+  my $fact = Metabase::Fact->from_struct( $struct );
+
+This takes the output of the C<as_struct> method and reconstitutes a Fact
+object.  If the class the struct represents is not loaded, C<from_struct>
+will attempt to load the class or will throw an error.
+
+=head1 OBJECT METHODS
+
+The following methods are implemented by Metabase::Fact and subclasses
+generally should not need to override them.
 
 =head2 core_metadata
 
@@ -636,14 +682,6 @@ This method sets the C<valid> core metadata to a boolean value.
 This method sets the C<update_time> core metadata for the core metadata for the
 fact to the current time in ISO 8601 UTC format with a trailing "Z" (Zulu)
 suffic.
-
-=head2 save
-
-  $fact->save($filename);
-
-This method writes out the fact to a file in JSON format.  If the file cannot
-be written, an exception is raised.  If the save is successful, a true value is
-returned.
 
 =head1 ABSTRACT METHODS
 
