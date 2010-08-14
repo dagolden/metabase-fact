@@ -201,11 +201,7 @@ sub fact_classes {
 
 sub load_fact_classes {
   my ($self) = @_;
-
-  for my $f ( $self->fact_classes ) {
-    eval "require $f; 1" or Carp::confess "Could not load '$f': $@";
-  }
-
+  $self->_load_fact_class( $_ ) for $self->fact_classes;
   return;
 }
 

@@ -224,9 +224,14 @@ sub resource_metadata_types {
 # or else try to load it
 sub _load_fact_class {
   my ($class, $fact_class) = @_;
-  return unless defined $fact_class;
-  return 1 if $fact_class->can('type');
-  return eval "require $fact_class; 1";
+  unless ( defined $fact_class ) {
+    Carp::confess "Can't load undef as a module";
+  }
+  unless ( $fact_class->can('type') ) {
+    eval "require $fact_class; 1"
+      or Carp::confess "Could not load fact class $fact_class\: $@";
+  }
+  return 1;
 }
 
 sub as_struct {
@@ -256,9 +261,7 @@ sub from_struct {
   # Might be called as Metabase::Fact->from_struct($struct), so we
   # need to find and load the actual fact class
   my $fact_class = $class->class_from_type($struct->{metadata}{core}{type});
-  $class->_load_fact_class( $fact_class )
-    or Carp::confess "Could not find $fact_class to thaw a fact" .
-    ( $@ ? ": $@" : "" );
+  $class->_load_fact_class( $fact_class );
 
   my $metadata  = $struct->{metadata};
   my $core_meta = $metadata->{core};
