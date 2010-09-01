@@ -303,7 +303,8 @@ sub as_json {
 
 sub from_json {
   my ($class, $string) = @_;
-  my $struct = eval { JSON->new->ascii->decode( $string ) };
+  my $struct = eval { JSON->new->ascii->decode( $string ) }
+    or Carp::confess "Error decoding JSON:\n$@";
   return $class->from_struct( $struct );
 }
 
