@@ -75,10 +75,12 @@ my $bin = File::Spec->rel2abs(File::Spec->catfile( qw/bin metabase-profile/ ));
 my $cwd = Cwd::cwd();
 chdir $tempdir; END { chdir $cwd }
 my $output_file = 'my.profile.json';
-qx/$^X $bin -o $output_file --name "JohnPublic" --email jp\@example.com --secret 3.14159/;
+my $X = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
+$bin = $bin =~ m/\s/ ? qq{"$bin"} : $bin;
+qx/$X $bin -o $output_file --name "JohnPublic" --email jp\@example.com --secret 3.14159/;
 ok( -r $output_file, 'created named profile file with metabase-profile' );
 
-qx/$^X $bin --name "JohnPublic" --email jp\@example.com --secret 3.14159/;
+qx/$X $bin --name "JohnPublic" --email jp\@example.com --secret 3.14159/;
 ok( -r 'metabase_id.json', 'created default profile file with metabase-profile' );
 
 my $file_guts = do { local (@ARGV,$/) = 'metabase_id.json'; <> };

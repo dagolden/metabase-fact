@@ -2,6 +2,9 @@ Revision history for Metabase-Fact
 
 {{$NEXT}}
 
+  - Fix failing t/profile.t for CPAN build paths with spaces (RT#59580)
+    [Reini Urban]
+
 0.018     2010-09-01 18:22:44 EST5EDT
 
   - Improve diagnostics when JSON decoding fails
