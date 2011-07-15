@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Resource::perl;
-# ABSTRACT: class for Metabase resources under the perl scheme
+# VERSION
 
 use Carp ();
 
@@ -31,6 +31,8 @@ sub _init {
 }
 
 1;
+
+# ABSTRACT: class for Metabase resources under the perl scheme
 
 =pod
 

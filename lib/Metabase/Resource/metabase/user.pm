@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Resource::metabase::user;
-# ABSTRACT: class for Metabase user profiles
+# VERSION
 
 use Carp ();
 
@@ -26,6 +26,8 @@ sub validate {
 }
 
 1;
+
+# ABSTRACT: class for Metabase user profiles
 
 __END__
 

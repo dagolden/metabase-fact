@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Resource::perl::commit;
-# ABSTRACT: class for Metabase resources about perl commits
+# VERSION
 
 use Carp ();
 
@@ -86,6 +86,10 @@ When submitting a bug or request, please include a test-file or a patch to an
 existing test-file that illustrates the bug or desired feature.
 
 =cut
+
+1;
+
+# ABSTRACT: class for Metabase resources about perl commits
 
 __END__
 

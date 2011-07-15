@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::User::Secret;
-# ABSTRACT: Metabase fact for user shared authentication secret
+# VERSION
 
 use Metabase::Fact::String;
 our @ISA = qw/Metabase::Fact::String/;
@@ -15,6 +15,8 @@ sub new {
 }
 
 1;
+
+# ABSTRACT: Metabase fact for user shared authentication secret
 
 __END__
 

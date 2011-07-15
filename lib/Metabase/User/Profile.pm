@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::User::Profile;
-# ABSTRACT: Metabase report class for user-related facts
+# VERSION
 
 use Carp ();
 use Data::GUID guid_string => { -as => '_guid' };
@@ -63,6 +63,8 @@ sub report_spec {
 }
   
 1;
+
+# ABSTRACT: Metabase report class for user-related facts
 
 __END__
 

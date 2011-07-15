@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Resource;
-# ABSTRACT: factory class for Metabase resource descriptors
+# VERSION
 
 use Carp ();
 
@@ -23,7 +23,7 @@ sub _obj_eq {
 
 sub _load {
   my ($class,$subclass) = @_;
-  eval "require $subclass; 1"
+  eval "require $subclass; 1" ## no critic
     or Carp::confess("Could not load '$subclass': $@");
 }
 
@@ -35,7 +35,7 @@ sub _add {
   $self->_types->{$name} = $type;
   my $method = ref($self) . "::$name";
   if ( ! $installed{$method} ) {
-    no strict 'refs';
+    no strict 'refs'; ## no critic
     *{$method} = sub { return $_[0]->{_cache}{$name} };
     $installed{$method}++;
   }
@@ -110,6 +110,8 @@ sub validate {
 }
 
 1;
+
+# ABSTRACT: factory class for Metabase resource descriptors
 
 __END__
 

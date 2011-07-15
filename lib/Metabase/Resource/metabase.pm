@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Resource::metabase;
-# ABSTRACT: class for Metabase resources
+# VERSION
 
 use Carp ();
 
@@ -38,6 +38,8 @@ sub _init {
 }
 
 1;
+
+# ABSTRACT: class for Metabase resources
 
 __END__
 

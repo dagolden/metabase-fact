@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Resource::cpan::distfile;
-# ABSTRACT: class for Metabase resources
+# VERSION
 
 use Carp ();
 use CPAN::DistnameInfo ();
@@ -74,6 +74,8 @@ sub _validate_distfile {
 }
 
 1;
+
+# ABSTRACT: class for Metabase resources
 
 __END__
 

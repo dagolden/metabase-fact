@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Fact::String;
-# ABSTRACT: fact subtype for simple strings
+# VERSION
 
 use Carp ();
 
@@ -31,6 +31,8 @@ sub content_from_bytes {
 }
 
 1;
+
+# ABSTRACT: fact subtype for simple strings
 
 __END__
 

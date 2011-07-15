@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Report;
-# ABSTRACT: a base class for collections of Metabase facts
+# VERSION
 
 use Carp ();
 use JSON 2 ();
@@ -206,6 +206,8 @@ sub load_fact_classes {
 }
 
 1;
+
+# ABSTRACT: a base class for collections of Metabase facts
 
 __END__
 

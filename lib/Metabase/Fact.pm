@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Fact;
-# ABSTRACT: base class for Metabase Facts
+# VERSION
 
 use Carp ();
 use Data::GUID guid_string => { -as => '_guid' };
@@ -228,7 +228,7 @@ sub _load_fact_class {
     Carp::confess "Can't load undef as a module";
   }
   unless ( $fact_class->can('type') ) {
-    eval "require $fact_class; 1"
+    eval "require $fact_class; 1" ## no critic
       or Carp::confess "Could not load fact class $fact_class\: $@";
   }
   return 1;
@@ -359,7 +359,7 @@ sub class_from_type {
 
 # XXX should this be a fatal abstract?  Forcing classes to be
 # explicit about schema versions? Annoying, but correct -- dagolden, 2009-03-31
-sub default_schema_version() { 1 }
+sub default_schema_version { 1 }
 
 #--------------------------------------------------------------------------#
 # abstract methods -- mostly fatal
@@ -393,8 +393,7 @@ sub validate_content {
 
 1;
 
-__END__
-
+# ABSTRACT: base class for Metabase Facts
 
 =head1 SYNOPSIS
 

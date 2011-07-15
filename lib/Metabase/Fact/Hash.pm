@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Fact::Hash;
-# ABSTRACT: fact subtype for simple hashes
+# VERSION
 
 use Carp ();
 use JSON 2 ();
@@ -39,6 +39,8 @@ sub content_from_bytes {
 }
 
 1;
+
+# ABSTRACT: fact subtype for simple hashes
 
 __END__
 

@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package Metabase::Resource::metabase::fact;
-# ABSTRACT: class for Metabase facts
+# VERSION
 
 use Carp ();
 
@@ -26,6 +26,8 @@ sub validate {
 }
 
 1;
+
+# ABSTRACT: class for Metabase facts
 
 __END__
 
