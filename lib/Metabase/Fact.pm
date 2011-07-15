@@ -741,6 +741,10 @@ Here is a hypothetical example of C<content_metadata> for an image fact:
     }
   }
 
+Field names should be valid perl identifiers, consisting of alphanumeric
+characters or underscores.  Hyphens and periods are allowed, but are not
+recommended.
+
 =head2 content_metadata_types
 
 B<optional>

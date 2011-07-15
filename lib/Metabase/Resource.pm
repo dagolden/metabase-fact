@@ -235,6 +235,10 @@ resource like 'metabase:user:ec2726a4-070c-11df-a2e0-0018f34ec37c':
     }
   }
 
+Field names should be valid perl identifiers, consisting of alphanumeric
+characters or underscores.  Hyphens and periods are allowed, but are not
+recommended.
+
 =head2 metadata_types
 
   my $typemap = $resource->metadata_types;
