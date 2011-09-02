@@ -10,25 +10,26 @@ use CPAN::DistnameInfo ();
 use Metabase::Resource::cpan;
 our @ISA = qw/Metabase::Resource::cpan/;
 
-my %metadata_types = (
-  cpan_id       => '//str',
-  dist_file     => '//str',
-  dist_name     => '//str',
-  dist_version  => '//str',
-);
+sub _metadata_types {
+  return {
+    cpan_id       => '//str',
+    dist_file     => '//str',
+    dist_name     => '//str',
+    dist_version  => '//str',
+  }
+}
 
 sub _init {
   my ($self) = @_;
-  my ($scheme, $subtype) = ($self->scheme, $self->subtype);
 
   # determine subtype
-  my ($string) = $self =~ m{\A$scheme:///$subtype/(.+)\z};
+  my ($string) = $self =~ m{\Acpan:///distfile/(.+)\z};
   Carp::confess("could not determine distfile from '$self'\n")
     unless defined $string && length $string;
 
   my $data = $self->_validate_distfile($string);
   for my $k ( keys %$data ) {
-    $self->_add( $k => $metadata_types{$k} =>  $data->{$k} );
+    $self->_add( $k => $data->{$k} );
   }
   return $self;
 }

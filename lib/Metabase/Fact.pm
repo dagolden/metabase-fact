@@ -159,7 +159,7 @@ sub set_creator {
 
   # validate $uri
   my $obj = Metabase::Resource->new($uri);
-  unless ( $obj->scheme eq 'metabase' && $obj->subtype eq 'user' ) {
+  unless ( $obj->type eq 'Metabase-Resource-metabase-user' ) {
     Carp::confess(
       "creator must be a Metabase User Profile resource URI of\n" .
       "the form 'metabase:user:XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'"

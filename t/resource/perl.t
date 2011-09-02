@@ -51,14 +51,12 @@ is( $obj->resource, $string, "object content correct" );
 # test metadata
 
 my $metadata_types = {
-  scheme        => '//str',
-  subtype       => '//str',
+  type          => '//str',
   sha1          => '//str',
 };
 
 my $expected_metadata = {
-  scheme        => 'perl',
-  subtype       => 'commit',
+  type          => 'Metabase-Resource-perl-commit',
   sha1          => $sha1,
 };
 

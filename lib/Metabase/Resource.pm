@@ -30,16 +30,22 @@ sub _load {
 my %installed;
 
 sub _add {
-  my ($self, $name, $type, $value) = @_;
-  $self->_cache->{$name} = $value;
-  $self->_types->{$name} = $type;
+  my ($self, $name, $value) = @_;
+  $self->{metadata}{$name} = $value;
   my $method = ref($self) . "::$name";
   if ( ! $installed{$method} ) {
     no strict 'refs'; ## no critic
-    *{$method} = sub { return $_[0]->{_cache}{$name} };
+    *{$method} = sub { return $_[0]->{metadata}{$name} };
     $installed{$method}++;
   }
   return;
+}
+
+sub _type {
+  my ($self) = @_;
+  my $class = ref $self || $self;
+  $class =~ s{::}{-}g;
+  return $class;
 }
 
 sub new {
@@ -51,53 +57,46 @@ sub new {
     $resource = $resource->resource;
   }
 
-  # construct object
-  my $self = bless { 
-    resource => $resource,
-    _cache  => {},
-    _types  => {},
-  }, $class;
-
   # parse scheme
   my ($scheme) = $resource =~ m{\A([^:]+):};
   Carp::confess("could not determine URI scheme from '$resource'\n")
     unless defined $scheme && length $scheme;
-  $self->_add( scheme => '//str' => $scheme );
+
+  my $subclass = "Metabase::Resource::$scheme";
+  $class->_load($subclass);
+
+  # construct object
+  my $self = bless {
+    resource => $resource,
+    metadata  => {},
+  }, $subclass;
 
   # initialize; delegates to subclass based on scheme and can re-bless
-  $self->_init;
+  $self->_init if $self->can("_init");
+  $self->_add( type => $self->_type );
   $self->validate;
   return $self;
 }
 
-sub _init {
-  my $self = shift;
-  my $subclass = "Metabase::Resource::" . $self->scheme;
-  $self->_load($subclass);
-  bless $self, $subclass;
-  $self->_init unless $self->can("_init") eq \&_init; # no loops!
-  return $self;
-}
-
-sub _cache  { return $_[0]->{_cache} }
-
-sub _types  { return $_[0]->{_types} }
-
 # Don't cause segfault with perl-5.6.1 by
 # overloading undef stuff...
 sub resource {
-  return '' unless defined $_[0]->{resource};
+  return '' unless ref $_[0] && defined $_[0]->{resource};
   return "$_[0]->{resource}";
 }
 
+# return a copy
 sub metadata {
   my ($self) = @_;
-  return { %{$self->_cache} };
+  return { %{$self->{metadata} || {}} };
 }
 
 sub metadata_types {
   my ($self) = @_;
-  return { %{$self->_types} };
+  return {
+    'type' => '//str',
+    %{$self->_metadata_types || {}}
+  };
 }
 
 #--------------------------------------------------------------------------#
@@ -131,8 +130,8 @@ A Metabase can be used to store test reports, reviews, coverage analysis
 reports, reports on static analysis of coding style, or anything else for which
 L<Metabase::Fact> types are constructed.
 
-Resources in Metabase are URI's that consist of a scheme and scheme 
-specific information.  For example, a standard URI framework for a 
+Resources in Metabase are URI's that consist of a scheme and scheme
+specific information.  For example, a standard URI framework for a
 CPAN distribution is defined by the L<URI::cpan> class.
 
   cpan:///distfile/RJBS/URI-cpan-1.000.tar.gz
@@ -145,14 +144,13 @@ For example, the L<Metabase::Resource::cpan> class will deconstruct the example
 above this into a Metabase resource metadata structure with the following
 elements:
 
-  scheme       => cpan
-  subtype      => distfile
+  type         => Metabase-Resource-cpan-distfile
   dist_file    => RJBS/URI-cpan-1.000.tar.gz
   cpan_id      => RJBS
   dist_name    => URI-cpan
   dist_version => 1.000
 
-Only the C<scheme> field is mandatory for all resources.  The other fields are
+Only the C<type> field is mandatory for all resources.  The other fields are
 all specific to Metabase::Resource::cpan.
 
 =head1 COMMON METHODS
@@ -197,7 +195,9 @@ MAY store structured data derived from the content string during validation.
 
 Subclasses SHOULD use the C<content> method to access the resource string and
 the C<scheme> method to access the scheme.  Subclasses MAY use the C<_cache>
-accessor to store derived data.
+accessor to store derived metadata data. Subclasses MUST provide a
+C<metadata_types> method to return data types for all elements stored
+in C<_cache>.
 
 All subclasses MUST implement the C<validate>, C<metadata> and
 C<metadata_types> methods, as described below.
@@ -222,7 +222,7 @@ The C<scheme> key MUST be present and the C<scheme> value MUST be identical to
 the string from the C<scheme> accessor.  Other keys SHOULD provide dimensions
 to differentiate one resource from another in the context of C<scheme>.  If a
 scheme has subcategories, the key C<type> SHOULD be used for the subcategory.
-Values MUST be simple scalars, not references. 
+Values MUST be simple scalars, not references.
 
 Here is a hypothetical example of a C<metadata> function for a metabase user
 resource like 'metabase:user:ec2726a4-070c-11df-a2e0-0018f34ec37c':

@@ -12,7 +12,7 @@ use Test::Exception;
 
 use lib 't/lib';
 
-plan tests => 15;
+plan tests => 14;
 
 require_ok( 'Metabase::Resource' );
 require_ok( 'Metabase::Resource::metabase' );
@@ -68,14 +68,12 @@ is( "$obj", $string, "string overloading working correctly" );
 # test metadata
 
 my $metadata_types = {
-  scheme  => '//str',
-  subtype => '//str',
+  type  => '//str',
   guid    => '//str',
 };
 
 my $expected_metadata = {
-  scheme  => 'metabase',
-  subtype => 'user',
+  type => 'Metabase-Resource-metabase-user',
   guid    => 'b66c7662-1d34-11de-a668-0df08d1878c0',
 };
 

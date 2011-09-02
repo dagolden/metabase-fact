@@ -22,16 +22,14 @@ sub _validate_guid {
 
 sub _init {
   my ($self) = @_;
-  my $scheme = $self->scheme;
 
-  # determine subtype
-  my ($subtype) = $self =~ m{\A$scheme:([^:]+)};
-  Carp::confess("could not determine URI subtype from '$self'\n")
-    unless defined $subtype && length $subtype;
-  $self->_add( subtype => '//str' =>  $subtype);
+  # determine type
+  my ($type) = $self =~ m{\Ametabase:([^:]+)};
+  Carp::confess("could not determine URI type from '$self'\n")
+    unless defined $type && length $type;
 
   # rebless into subclass and finish initialization
-  my $subclass = __PACKAGE__ . "::$subtype";
+  my $subclass = __PACKAGE__ . "::$type";
   $self->_load($subclass);
   bless $self, $subclass;
   return $self->_init;

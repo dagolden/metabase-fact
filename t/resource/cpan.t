@@ -50,8 +50,7 @@ is( $obj->resource, $string, "object content correct" );
 # test metadata
 
 my $metadata_types = {
-  scheme        => '//str',
-  subtype       => '//str',
+  type       => '//str',
   cpan_id       => '//str',
   dist_file     => '//str',
   dist_name     => '//str',
@@ -59,8 +58,7 @@ my $metadata_types = {
 };
 
 my $expected_metadata = {
-  scheme        => 'cpan',
-  subtype       => 'distfile',
+  type           => 'Metabase-Resource-cpan-distfile',
   cpan_id       => 'JOHNDOE',
   dist_file     => 'JOHNDOE/Foo-Bar-1.23.tar.gz',
   dist_name     => 'Foo-Bar',

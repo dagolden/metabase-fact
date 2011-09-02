@@ -4,26 +4,9 @@ use warnings;
 package Metabase::Resource::metabase::user;
 # VERSION
 
-use Carp ();
 
-use Metabase::Resource::metabase;
-our @ISA = qw/Metabase::Resource::metabase/;
-
-sub _init {
-  my ($self) = @_;
-  my ($scheme, $subtype) = ($self->scheme, $self->subtype);
-  my ($guid) = $self =~ m{\A$scheme:$subtype:(.+)\z};
-  Carp::confess("could not determine guid from '$self'\n")
-    unless defined $guid && length $guid;
-  $self->_add( guid => '//str' =>  $guid);
-  return $self;
-}
-
-sub validate {
-  my $self = shift;
-  $self->_validate_guid( $self->guid );
-  return 1;
-}
+use Metabase::Resource::metabase::fact;
+our @ISA = qw/Metabase::Resource::metabase::fact/;
 
 1;
 

@@ -9,15 +9,16 @@ use Carp ();
 use Metabase::Resource::perl;
 our @ISA = qw/Metabase::Resource::perl/;
 
-my %metadata_types = (
-  sha1          => '//str',
-);
+sub _metadata_types {
+  return {
+    sha1          => '//str',
+  };
+}
 
 sub _init {
   my ($self) = @_;
-  my ($scheme, $subtype) = ($self->scheme, $self->subtype);
 
-  my ($string) = $self =~ m{\A$scheme:///$subtype/(.+)\z};
+  my ($string) = $self =~ m{\Aperl:///commit/(.+)\z};
   Carp::confess("could not determine commit from '$self'\n")
     unless defined $string && length $string;
 
@@ -25,7 +26,7 @@ sub _init {
   Carp::confess("illegal commit hash")
     unless $sha1 =~ m/^[a-f0-9]+$/;
 
-  $self->_add( 'sha1' => $metadata_types{sha1} => $sha1 );
+  $self->_add( 'sha1' => $sha1 );
 
   return $self;
 }
