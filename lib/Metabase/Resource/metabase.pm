@@ -20,19 +20,14 @@ sub _validate_guid {
   return $string;
 }
 
-sub _init {
-  my ($self) = @_;
+sub _extract_type {
+  my ($self, $resource) = @_;
 
   # determine type
-  my ($type) = $self =~ m{\Ametabase:([^:]+)};
-  Carp::confess("could not determine URI type from '$self'\n")
+  my ($type) = $resource =~ m{\Ametabase:([^:]+)};
+  Carp::confess("could not determine URI type from '$resource'\n")
     unless defined $type && length $type;
-
-  # rebless into subclass and finish initialization
-  my $subclass = __PACKAGE__ . "::$type";
-  $self->_load($subclass);
-  bless $self, $subclass;
-  return $self->_init;
+  return __PACKAGE__ . "::$type";
 }
 
 1;

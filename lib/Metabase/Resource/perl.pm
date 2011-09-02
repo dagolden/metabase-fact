@@ -9,23 +9,18 @@ use Carp ();
 use Metabase::Resource;
 our @ISA = qw/Metabase::Resource/;
 
-sub _init {
-  my ($self) = @_;
+sub _extract_type {
+  my ($self, $resource) = @_;
 
   # determine type
   # Possible types could be:
   #  - commit
   #  - tag -- not implemented
   #  - tarball -- not implemented
-  my ($type) = $self =~ m{\Aperl:///([^/]+)/};
-  Carp::confess("could not determine Metabase::Resource type from '$self'\n")
+  my ($type) = $resource =~ m{\Aperl:///([^/]+)/};
+  Carp::confess("could not determine Metabase::Resource type from '$resource'\n")
     unless defined $type && length $type;
-
-  # rebless into subclass and finish initialization
-  my $subclass = __PACKAGE__ . "::$type";
-  $self->_load($subclass);
-  bless $self, $subclass;
-  return $self->_init;
+  return __PACKAGE__ . "::$type";
 }
 
 1;

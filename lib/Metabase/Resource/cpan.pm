@@ -9,19 +9,12 @@ use Carp ();
 use Metabase::Resource;
 our @ISA = qw/Metabase::Resource/;
 
-sub _init {
-  my ($self) = @_;
-
-  # determine type
-  my ($type) = $self =~ m{\Acpan:///([^/]+)/};
-  Carp::confess("could not determine Metabase::Resource type from '$self'\n")
+sub _extract_type {
+  my ($self, $resource) = @_;
+  my ($type) = $resource =~ m{\Acpan:///([^/]+)/};
+  Carp::confess("could not determine Metabase::Resource type from '$resource'\n")
     unless defined $type && length $type;
-
-  # rebless into subclass and finish initialization
-  my $subclass = __PACKAGE__ . "::$type";
-  $self->_load($subclass);
-  bless $self, $subclass;
-  return $self->_init;
+  return __PACKAGE__ . "::$type";
 }
 
 1;

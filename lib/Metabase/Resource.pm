@@ -62,17 +62,20 @@ sub new {
   Carp::confess("could not determine URI scheme from '$resource'\n")
     unless defined $scheme && length $scheme;
 
-  my $subclass = "Metabase::Resource::$scheme";
-  $class->_load($subclass);
+  my $schema_class = "Metabase::Resource::$scheme";
+  $class->_load($schema_class);
+  my $type_class = $schema_class->_extract_type($resource);
+  $class->_load($type_class);
 
   # construct object
   my $self = bless {
     resource => $resource,
     metadata  => {},
-  }, $subclass;
+  }, $type_class;
+  if ( $self->can('_init') ) {
+    $self->_init;
+  }
 
-  # initialize; delegates to subclass based on scheme and can re-bless
-  $self->_init if $self->can("_init");
   $self->_add( type => $self->_type );
   $self->validate;
   return $self;
