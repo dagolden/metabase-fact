@@ -195,7 +195,7 @@ sub set_valid {
 
 sub core_metadata {
   my $self = shift;
-  $self->{metadata}{core};
+  return { %{$self->{metadata}{core}} };
 }
 
 sub core_metadata_types {
@@ -214,7 +214,7 @@ sub core_metadata_types {
 sub resource_metadata {
   my $self = shift;
   $self->{metadata}{resource} ||= $self->resource->metadata;
-  return $self->{metadata}{resource};
+  return { %{$self->{metadata}{resource}} };
 }
 
 sub resource_metadata_types {
