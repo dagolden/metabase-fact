@@ -54,7 +54,11 @@ sub __validate_guid {
 sub validate_resource {
   my ($self, $uri) = @_;
   # Metabase::Resource->new dies if invalid
-  return Metabase::Resource->new($uri);
+  my $obj = Metabase::Resource->new($uri);
+  if ( ! (ref($obj) && $obj->isa("Metabase::Resource") ) ) {
+    Carp::confess("Could not validate '$uri' as a Metabase::Resource");
+  }
+  return $obj;
 }
 
 sub new {
