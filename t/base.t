@@ -13,7 +13,7 @@ use Test::Exception;
 use lib 't/lib';
 use Test::Metabase::StringFact;
 
-plan tests => 15;
+plan tests => 17;
 
 require_ok( 'Metabase::Fact' );
 
@@ -79,3 +79,18 @@ isa_ok( $obj, 'Test::Metabase::StringFact' );
 
 is( $obj->type, "Test-Metabase-StringFact", "object type is correct" );
 is( $obj->content, $string, "object content correct" );
+
+#--------------------------------------------------------------------------#
+# class validation
+#--------------------------------------------------------------------------#
+
+eval { $obj->_load_fact_class("Cwd;die 'Insecure'!"); };
+like( $@, qr/does not look like a class name/,
+  "fact class loading validates class name"
+);
+eval { $obj->resource->_load("Cwd;die 'Insecure'!"); };
+like( $@, qr/does not look like a class name/,
+  "fact class loading validates class name"
+);
+
+

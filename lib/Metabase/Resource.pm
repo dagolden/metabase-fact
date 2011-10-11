@@ -21,8 +21,13 @@ sub _obj_eq {
     return overload::StrVal($_[0]) eq overload::StrVal($_[1]);
 }
 
+my $id_re = qr/[_a-z]+/i;
+my $class_re = qr/^$id_re(?:::$id_re)*$/;
 sub _load {
   my ($class,$subclass) = @_;
+  unless ( $subclass =~ $class_re ) {
+    Carp::confess "'$subclass' does not look like a class name";
+  }
   eval "require $subclass; 1" ## no critic
     or Carp::confess("Could not load '$subclass': $@");
 }

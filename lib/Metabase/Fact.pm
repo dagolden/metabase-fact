@@ -226,10 +226,16 @@ sub resource_metadata_types {
 
 # Class might not be in its own file -- check if method can resolve
 # or else try to load it
+my $id_re = qr/[_a-z]+/i;
+my $class_re = qr/^$id_re(?:::$id_re)*$/;
+
 sub _load_fact_class {
   my ($class, $fact_class) = @_;
   unless ( defined $fact_class ) {
     Carp::confess "Can't load undef as a module";
+  }
+  unless ( $fact_class =~ $class_re ) {
+    Carp::confess "'$fact_class' does not look like a class name";
   }
   unless ( $fact_class->can('type') ) {
     eval "require $fact_class; 1" ## no critic
