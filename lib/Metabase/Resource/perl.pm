@@ -42,7 +42,7 @@ sub _extract_type {
 
 Generates resource metadata for resources of the scheme 'perl'.
 
-The L<Metabase::Resource::perl> class supports the followng sub-type(s).
+The L<Metabase::Resource::perl> class supports the following sub-type(s).
 
 =head2 commit
 

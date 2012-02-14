@@ -5,6 +5,8 @@ Revision history for Metabase-Fact
   - Fixed generated NAME Pod section for metabase-profile
     [rt.cpan.org #62436; patch by Randy Stauner]
 
+  - Fixed various spelling errors in Pod
+
 0.020     2011-07-14 22:53:39 America/New_York
 
   - Document limitations on content and resource metadata field names

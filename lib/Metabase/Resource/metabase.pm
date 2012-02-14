@@ -49,7 +49,7 @@ __END__
 
 Generates resource metadata for resources of the scheme 'metabase'.
 
-The L<Metabase::Resource::metabase> class supports the followng sub-type(s).
+The L<Metabase::Resource::metabase> class supports the following sub-type(s).
 
 =head2 fact 
 

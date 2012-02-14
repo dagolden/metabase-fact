@@ -36,7 +36,7 @@ __END__
 
 Generates resource metadata for resources of the scheme 'cpan'.
 
-The L<Metabase::Resource::cpan> class supports the followng sub-type(s).
+The L<Metabase::Resource::cpan> class supports the following sub-type(s).
 
 =head2 distfile
 

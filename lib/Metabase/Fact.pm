@@ -513,7 +513,7 @@ accessor returns a Metabase::Resource subclass.
 
 A L<Metabase::User::Profile> URI that indicates the creator of the Fact.  If
 not set during Fact creation, it will be set by the Metabase when a Fact is
-submitted based on the submitter's Profile.  The C<set_creator> mutator may be
+submitted based on the submitter Profile.  The C<set_creator> mutator may be
 called to set C<creator>, but only if it is not previously set.  The associated
 accessor returns a Metabase::Resource subclass or C<undef> if the creator
 has not been set.
@@ -608,7 +608,7 @@ Schema version numbers should be monotonically-increasing integers.  The
 default schema version is used to set an objects schema_version attribution
 on creation.
 
-=head1 PERSISTANCE METHODS
+=head1 PERSISTENCE METHODS
 
 The following methods are implemented by Metabase::Fact and subclasses
 generally should not need to override them.
@@ -694,7 +694,7 @@ This method sets the C<valid> core metadata to a boolean value.
 
 This method sets the C<update_time> core metadata for the core metadata for the
 fact to the current time in ISO 8601 UTC format with a trailing "Z" (Zulu)
-suffic.
+suffice.
 
 =head1 ABSTRACT METHODS
 
