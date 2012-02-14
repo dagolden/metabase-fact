@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 package main; # dzil needs this
-# NAME: metabase-profile
+# PODNAME: metabase-profile
 # ABSTRACT: create a metabase profile
 
 use Getopt::Long;
