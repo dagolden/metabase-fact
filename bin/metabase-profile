@@ -2,9 +2,10 @@
 use 5.006;
 use strict;
 use warnings;
-package main; # dzil needs this
+package metabase_profile; # dzil needs this
 # PODNAME: metabase-profile
 # ABSTRACT: create a metabase profile
+# VERSION
 
 use Getopt::Long;
 use JSON 2;
