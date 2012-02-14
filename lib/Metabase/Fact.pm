@@ -87,7 +87,7 @@ sub new {
   return $self;
 }
 
-sub _zulu_datetime { 
+sub _zulu_datetime {
   my ($y,$mo,$d,$h,$mi,$s) = (gmtime)[reverse 0 .. 5];
   return sprintf("%4d-%02d-%02dT%02d:%02d:%02dZ",1900+$y,1+$mo,$d,$h,$mi,$s);
 }
@@ -123,7 +123,7 @@ sub _init_guts {
   my $self = bless {}, $class;
 
   $self->{content} = $args->{content};
-  
+
   my $meta = $self->{metadata} = { core => {} };
   $meta->{core}{guid}           = $class->__validate_guid($args->{guid});
   $meta->{core}{creation_time}  = $args->{creation_time} || _zulu_datetime();
@@ -440,7 +440,7 @@ and a C<creator> attribute.
 
 The C<resource> attribute must be in a URI format that can be validated via a
 L<Metabase::Resource> subclass.  The C<content> attribute is an opaque scalar
-with subclass-specific meaning.  The C<creator> attribute is a URI with a 
+with subclass-specific meaning.  The C<creator> attribute is a URI with a
 "metabase:user" scheme and type (see L<Metabase::Resource::metabase>).
 
 Facts have three sets of metadata associate with them.  Metadata are generally
@@ -472,7 +472,7 @@ C<resource_metadata> and C<content_metadata>.
 
 Each of the three sets also has an accessor that returns a hashref with a data
 type for each possible element in the set: C<core_metadata_types>,
-C<resource_metadata_types> and C<content_metadata_types>.  
+C<resource_metadata_types> and C<content_metadata_types>.
 
 Data types are loosely based on L<Data::RX>.  For example:
 
@@ -541,8 +541,8 @@ versions of the class have been released since the object was created.
 
 =head3 creation_time
 
-Fact creation time in UTC expressed in extended ISO 8601 format with a 
-"Z" (Zulu) suffix.  For example:  
+Fact creation time in UTC expressed in extended ISO 8601 format with a
+"Z" (Zulu) suffix.  For example:
 
   2010-01-10T12:34:56Z
 
@@ -591,7 +591,7 @@ A utility function to invert the operation of the C<type> method.
 =head2 upgrade_fact
 
   MyFact->upgrade_fact( $struct );
-  
+
 This method will be called when initializing a fact from a data structure that
 claims to be of a schema version other than the schema version reported by the
 loaded class's C<default_schema_version> method.  It will be passed the hashref
@@ -737,7 +737,7 @@ B<optional>
 If provided, this method MUST return a hash reference with content-specific
 indexing metadata. The key MUST be the name of the field for indexing and
 SHOULD provide dimensions to differentiate one set of content from another.
-Values MUST be simple scalars, not references. 
+Values MUST be simple scalars, not references.
 
 Here is a hypothetical example of C<content_metadata> for an image fact:
 
@@ -774,7 +774,7 @@ following:
   '//num' -- indicates a value that should be compared numerically
   '//bool' -- indicates a boolean value where "1" is true and "0" is false
 
-Here is a hypothetical example of C<content_metadata_types> for an image fact: 
+Here is a hypothetical example of C<content_metadata_types> for an image fact:
 
   sub content_metadata_types {
     return {
