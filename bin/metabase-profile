@@ -12,6 +12,7 @@ use JSON 2;
 use Metabase::User::Profile;
 use Metabase::User::Secret;
 use Pod::Usage;
+use IO::Prompt::Tiny qw(prompt);
 
 my (%profile, $help, $output, $full_name, $email_address, $password);
 my $result = GetOptions(
@@ -43,12 +44,10 @@ my @prompts = (
   password      => 'password/secret',
 );
 
-$|++; # autoflush prompts
 while (@prompts) {
   my ($key, $phrase) = splice(@prompts,0,2);
   next if $profile{$key};
-  print "Enter $phrase\: ";
-  chomp( my $answer = <STDIN> );
+  chomp( my $answer = prompt("Enter $phrase\: ") );
   $profile{$key} = $answer;
 }
 
