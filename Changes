@@ -2,6 +2,11 @@ Revision history for Metabase-Fact
 
 {{$NEXT}}
 
+  [FIXED]
+
+  - metabase-profile now prompts with IO::Prompt::Tiny to fix
+    some hanging bug on Win32
+
 0.021     2012-02-14 14:47:54 EST5EDT
 
   - Fixed generated NAME Pod section for metabase-profile
@@ -122,3 +127,5 @@ Revision history for Metabase-Fact
 
 0.001 2009-06-24
   - "YAPC::NA::2009, Pittsburgh" Release
+
+# vim: ts=2 sts=2 sw=2 et:
