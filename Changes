@@ -2,6 +2,14 @@ Revision history for Metabase-Fact
 
 {{$NEXT}}
 
+    [FIXED]
+
+    - Compile test could hang on Windows
+
+    [PREREQS]
+
+    - Dropped configure_requires for ExtUtils::MakeMaker to 6.17
+
 0.022     2013-09-11 09:30:13 America/New_York
 
   [FIXED]
