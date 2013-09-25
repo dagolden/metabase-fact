@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Fact;
 # VERSION
 
@@ -18,78 +19,80 @@ use Metabase::Resource;
 # needed to be a very small set of libraries.  Sadly, we've rolled our
 # own... -- rjbs, 2009-03-30
 sub __validate_args {
-  my ($self, $args, $spec) = @_;
-  my $hash = (@$args == 1 and ref $args->[0]) ? { %{ $args->[0]  } }
-           : (@$args == 0)                    ? { }
-           :                                    { @$args };
+    my ( $self, $args, $spec ) = @_;
+    my $hash =
+        ( @$args == 1 and ref $args->[0] ) ? { %{ $args->[0] } }
+      : ( @$args == 0 ) ? {}
+      :                   {@$args};
 
-  my @errors;
+    my @errors;
 
-  for my $key (keys %$hash) {
-    push @errors, qq{unknown argument "$key" when constructing $self}
-      unless exists $spec->{ $key };
-  }
+    for my $key ( keys %$hash ) {
+        push @errors, qq{unknown argument "$key" when constructing $self}
+          unless exists $spec->{$key};
+    }
 
-  for my $key (grep { $spec->{ $_ } } keys %$spec) {
-    push @errors, qq{missing required argument "$key" when constructing $self}
-      unless defined $hash->{ $key };
-  }
+    for my $key ( grep { $spec->{$_} } keys %$spec ) {
+        push @errors, qq{missing required argument "$key" when constructing $self}
+          unless defined $hash->{$key};
+    }
 
-  Carp::confess(join qq{\n}, @errors) if @errors;
+    Carp::confess( join qq{\n}, @errors ) if @errors;
 
-  return $hash;
+    return $hash;
 }
 
-my $hex = '[0-9a-f]';
+my $hex     = '[0-9a-f]';
 my $guid_re = qr(\A$hex{8}-$hex{4}-$hex{4}-$hex{4}-$hex{12}\z)i;
 
 sub __validate_guid {
-  my ($class, $string) = @_;
-  if ( $string !~ $guid_re ) {
-    Carp::confess("'$string' is not formatted as a GUID string");
-  }
-  return lc $string
+    my ( $class, $string ) = @_;
+    if ( $string !~ $guid_re ) {
+        Carp::confess("'$string' is not formatted as a GUID string");
+    }
+    return lc $string;
 }
 
 sub validate_resource {
-  my ($self, $uri) = @_;
-  # Metabase::Resource->new dies if invalid
-  my $obj = Metabase::Resource->new($uri);
-  if ( ! (ref($obj) && $obj->isa("Metabase::Resource") ) ) {
-    Carp::confess("Could not validate '$uri' as a Metabase::Resource");
-  }
-  return $obj;
+    my ( $self, $uri ) = @_;
+    # Metabase::Resource->new dies if invalid
+    my $obj = Metabase::Resource->new($uri);
+    if ( !( ref($obj) && $obj->isa("Metabase::Resource") ) ) {
+        Carp::confess("Could not validate '$uri' as a Metabase::Resource");
+    }
+    return $obj;
 }
 
 sub new {
-  my ($class, @args) = @_;
-  my $args = $class->__validate_args(
-    \@args,
-    {
-      content  => 1,
-      resource => 1,  # where to validate? -- dagolden, 2009-03-31
-      # still optional so we can manipulate anon facts -- dagolden, 2009-05-12
-      creator => 0,
-      # helpful for constructing facts with non-random guids
-      guid => 0,
-    },
-  );
+    my ( $class, @args ) = @_;
+    my $args = $class->__validate_args(
+        \@args,
+        {
+            content  => 1,
+            resource => 1, # where to validate? -- dagolden, 2009-03-31
+            # still optional so we can manipulate anon facts -- dagolden, 2009-05-12
+            creator => 0,
+            # helpful for constructing facts with non-random guids
+            guid => 0,
+        },
+    );
 
-  # create the object
-  my $self = $class->_init_guts($args);
+    # create the object
+    my $self = $class->_init_guts($args);
 
-  # validate content
-  eval { $self->validate_content };
-  if ($@) {
-    Carp::confess("$class object content invalid: $@");
-  }
+    # validate content
+    eval { $self->validate_content };
+    if ($@) {
+        Carp::confess("$class object content invalid: $@");
+    }
 
-  return $self;
+    return $self;
 }
 
 sub _zulu_datetime {
-  my ($y,$mo,$d,$h,$mi,$s) = (gmtime)[reverse 0 .. 5];
-  return sprintf("%4d-%02d-%02dT%02d:%02d:%02dZ",1900+$y,1+$mo,$d,$h,$mi,$s);
+    my ( $y, $mo, $d, $h, $mi, $s ) = (gmtime)[ reverse 0 .. 5 ];
+    return
+      sprintf( "%4d-%02d-%02dT%02d:%02d:%02dZ", 1900 + $y, 1 + $mo, $d, $h, $mi, $s );
 }
 
 sub _bool { return $_[0] ? 1 : 0 }
@@ -98,243 +101,241 @@ sub _bool { return $_[0] ? 1 : 0 }
 # only content, resource, guid and creator could exist; in
 # the latter case, all fields would exist
 sub _init_guts {
-  my ($class, $args) = @_;
+    my ( $class, $args ) = @_;
 
-  # confirm type
-  $args->{type} = $class->type
-    unless defined $args->{type};
+    # confirm type
+    $args->{type} = $class->type
+      unless defined $args->{type};
 
-  Carp::confess("illegal type ($args->{type}) for $class")
-    if $args->{type} ne $class->type;
+    Carp::confess("illegal type ($args->{type}) for $class")
+      if $args->{type} ne $class->type;
 
-  # if restoring from_struct, we must cope with older schemas
-  $args->{schema_version} = $class->default_schema_version
-    unless defined $args->{schema_version};
+    # if restoring from_struct, we must cope with older schemas
+    $args->{schema_version} = $class->default_schema_version
+      unless defined $args->{schema_version};
 
-  $class->upgrade_fact($args)
-    if  $args->{schema_version} != $class->default_schema_version;
+    $class->upgrade_fact($args)
+      if $args->{schema_version} != $class->default_schema_version;
 
-  # initialize guid if not provided
-  if ( ! defined $args->{guid} ) {
-    $args->{guid} = lc _guid();
-  }
+    # initialize guid if not provided
+    if ( !defined $args->{guid} ) {
+        $args->{guid} = lc _guid();
+    }
 
-  # initialize the object
-  my $self = bless {}, $class;
+    # initialize the object
+    my $self = bless {}, $class;
 
-  $self->{content} = $args->{content};
+    $self->{content} = $args->{content};
 
-  my $meta = $self->{metadata} = { core => {} };
-  $meta->{core}{guid}           = $class->__validate_guid($args->{guid});
-  $meta->{core}{creation_time}  = $args->{creation_time} || _zulu_datetime();
-  $meta->{core}{update_time}    = $meta->{core}{creation_time};
-  $meta->{core}{schema_version} = $args->{schema_version};
-  $meta->{core}{type}           = $self->type;
-  $meta->{core}{valid}          = _bool( defined $args->{valid} ? $args->{valid} : 1 );
+    my $meta = $self->{metadata} = { core => {} };
+    $meta->{core}{guid}           = $class->__validate_guid( $args->{guid} );
+    $meta->{core}{creation_time}  = $args->{creation_time} || _zulu_datetime();
+    $meta->{core}{update_time}    = $meta->{core}{creation_time};
+    $meta->{core}{schema_version} = $args->{schema_version};
+    $meta->{core}{type}           = $self->type;
+    $meta->{core}{valid}          = _bool( defined $args->{valid} ? $args->{valid} : 1 );
 
-  # validate creator via mutator if given
-  $self->set_creator($args->{creator}) if defined $args->{creator};
+    # validate creator via mutator if given
+    $self->set_creator( $args->{creator} ) if defined $args->{creator};
 
-  # validate resource field
-  $meta->{core}{resource} = $self->validate_resource($args->{resource});
+    # validate resource field
+    $meta->{core}{resource} = $self->validate_resource( $args->{resource} );
 
-  return $self;
+    return $self;
 }
 
 # Content accessor
-sub content         { $_[0]->{content}                        }
+sub content { $_[0]->{content} }
 
 # Accessors for core metadata
 
-sub creation_time   { $_[0]->{metadata}{core}{creation_time}  }
-sub guid            { $_[0]->{metadata}{core}{guid}           }
-sub resource        { $_[0]->{metadata}{core}{resource}       }
-sub schema_version  { $_[0]->{metadata}{core}{schema_version} }
+sub creation_time  { $_[0]->{metadata}{core}{creation_time} }
+sub guid           { $_[0]->{metadata}{core}{guid} }
+sub resource       { $_[0]->{metadata}{core}{resource} }
+sub schema_version { $_[0]->{metadata}{core}{schema_version} }
 
 # Creator can be set once after the fact is created
 
-sub creator      { $_[0]->{metadata}{core}{creator}     }
+sub creator { $_[0]->{metadata}{core}{creator} }
 
 sub set_creator {
-  my ($self, $uri) = @_;
+    my ( $self, $uri ) = @_;
 
-  Carp::confess("can't set creator; it is already set")
-    if $self->creator;
+    Carp::confess("can't set creator; it is already set")
+      if $self->creator;
 
-  # validate $uri
-  my $obj = Metabase::Resource->new($uri);
-  unless ( $obj->type eq 'Metabase-Resource-metabase-user' ) {
-    Carp::confess(
-      "creator must be a Metabase User Profile resource URI of\n" .
-      "the form 'metabase:user:XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'"
-    );
-  }
+    # validate $uri
+    my $obj = Metabase::Resource->new($uri);
+    unless ( $obj->type eq 'Metabase-Resource-metabase-user' ) {
+        Carp::confess( "creator must be a Metabase User Profile resource URI of\n"
+              . "the form 'metabase:user:XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX'" );
+    }
 
-  $self->{metadata}{core}{creator} = $obj;
+    $self->{metadata}{core}{creator} = $obj;
 }
 
 # update_time can always be modified
 
-sub update_time      { $_[0]->{metadata}{core}{update_time}     }
+sub update_time { $_[0]->{metadata}{core}{update_time} }
 
 sub touch {
-  my ($self) = @_;
-  $self->{metadata}{core}{update_time} = _zulu_datetime();
+    my ($self) = @_;
+    $self->{metadata}{core}{update_time} = _zulu_datetime();
 }
 
 # valid can be modified
 
-sub valid  { $_[0]->{metadata}{core}{valid} }
+sub valid { $_[0]->{metadata}{core}{valid} }
 
 sub set_valid {
-  my ($self, $val) = @_;
-  $self->{metadata}{core}{valid} = _bool($val)
+    my ( $self, $val ) = @_;
+    $self->{metadata}{core}{valid} = _bool($val);
 }
 
 # metadata structure accessors
 
 sub core_metadata {
-  my $self = shift;
-  return { %{$self->{metadata}{core}} };
+    my $self = shift;
+    return { %{ $self->{metadata}{core} } };
 }
 
 sub core_metadata_types {
-  return {
-    creation_time   => '//str',
-    creator         => '//str',
-    guid            => '//str',
-    resource        => '//str',
-    schema_version  => '//num',
-    type            => '//str',
-    update_time     => '//str',
-    valid           => '//bool',
-  }
+    return {
+        creation_time  => '//str',
+        creator        => '//str',
+        guid           => '//str',
+        resource       => '//str',
+        schema_version => '//num',
+        type           => '//str',
+        update_time    => '//str',
+        valid          => '//bool',
+    };
 }
 
 sub resource_metadata {
-  my $self = shift;
-  $self->{metadata}{resource} ||= $self->resource->metadata;
-  return { %{$self->{metadata}{resource}} };
+    my $self = shift;
+    $self->{metadata}{resource} ||= $self->resource->metadata;
+    return { %{ $self->{metadata}{resource} } };
 }
 
 sub resource_metadata_types {
-  my $self = shift;
-  return $self->resource->metadata_types;
+    my $self = shift;
+    return $self->resource->metadata_types;
 }
 
 # persistence routines
 
 # Class might not be in its own file -- check if method can resolve
 # or else try to load it
-my $id_re = qr/[_a-z]+/i;
+my $id_re    = qr/[_a-z]+/i;
 my $class_re = qr/^$id_re(?:::$id_re)*$/;
 
 sub _load_fact_class {
-  my ($class, $fact_class) = @_;
-  unless ( defined $fact_class ) {
-    Carp::confess "Can't load undef as a module";
-  }
-  unless ( $fact_class =~ $class_re ) {
-    Carp::confess "'$fact_class' does not look like a class name";
-  }
-  unless ( $fact_class->can('type') ) {
-    eval "require $fact_class; 1" ## no critic
-      or Carp::confess "Could not load fact class $fact_class\: $@";
-  }
-  return 1;
+    my ( $class, $fact_class ) = @_;
+    unless ( defined $fact_class ) {
+        Carp::confess "Can't load undef as a module";
+    }
+    unless ( $fact_class =~ $class_re ) {
+        Carp::confess "'$fact_class' does not look like a class name";
+    }
+    unless ( $fact_class->can('type') ) {
+        eval "require $fact_class; 1" ## no critic
+          or Carp::confess "Could not load fact class $fact_class\: $@";
+    }
+    return 1;
 }
 
 sub as_struct {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  # turn Metabase::Resources back into URI strings
-  my $core = { %{ $self->core_metadata } };
-  $core->{resource} = $core->{resource}->resource;
-  $core->{creator} = $core->{creator}->resource if exists $core->{creator};
+    # turn Metabase::Resources back into URI strings
+    my $core = { %{ $self->core_metadata } };
+    $core->{resource} = $core->{resource}->resource;
+    $core->{creator} = $core->{creator}->resource if exists $core->{creator};
 
-  return {
-    content  => $self->content_as_bytes,
-    metadata => {
-      # We only provide core metadata here, not resource or content metadata,
-      # because we use as_struct for serialized transmission.  The remote that
-      # receives the transmission should reconstruct the metadata for itself,
-      # as it is more likely to have an improved metadata producer. -- rjbs,
-      # 2009-06-24
-      core => $core,
-    }
-  };
+    return {
+        content  => $self->content_as_bytes,
+        metadata => {
+            # We only provide core metadata here, not resource or content metadata,
+            # because we use as_struct for serialized transmission.  The remote that
+            # receives the transmission should reconstruct the metadata for itself,
+            # as it is more likely to have an improved metadata producer. -- rjbs,
+            # 2009-06-24
+            core => $core,
+        }
+    };
 }
 
 sub from_struct {
-  my ($class, $struct) = @_;
+    my ( $class, $struct ) = @_;
 
-  # Might be called as Metabase::Fact->from_struct($struct), so we
-  # need to find and load the actual fact class
-  my $fact_class = $class->class_from_type($struct->{metadata}{core}{type});
-  $class->_load_fact_class( $fact_class );
+    # Might be called as Metabase::Fact->from_struct($struct), so we
+    # need to find and load the actual fact class
+    my $fact_class = $class->class_from_type( $struct->{metadata}{core}{type} );
+    $class->_load_fact_class($fact_class);
 
-  my $metadata  = $struct->{metadata};
-  my $core_meta = $metadata->{core};
+    my $metadata  = $struct->{metadata};
+    my $core_meta = $metadata->{core};
 
-  # transfrom struct into content and core metadata arguments the way they
-  # would be given to new, then validate these and get an object from
-  # _init_guts
-  my @args = (
-    (map { $_ => $core_meta->{$_} } keys %$core_meta),
-    content  => $fact_class->content_from_bytes($struct->{content}),
-  );
+    # transfrom struct into content and core metadata arguments the way they
+    # would be given to new, then validate these and get an object from
+    # _init_guts
+    my @args = (
+        ( map { $_ => $core_meta->{$_} } keys %$core_meta ),
+        content => $fact_class->content_from_bytes( $struct->{content} ),
+    );
 
-  my $args = $fact_class->__validate_args(
-    \@args,
-    {
-      # when thawing, all of these must be provided
-      content        => 1,
-      creation_time  => 1,
-      guid           => 1,
-      resource       => 1,
-      schema_version => 1,
-      type           => 1,
-      valid          => 1,
-      # still optional so we can manipulate anon facts -- dagolden, 2009-05-12
-      creator        => 0,
-      update_time    => 0,
-    },
-  );
+    my $args = $fact_class->__validate_args(
+        \@args,
+        {
+            # when thawing, all of these must be provided
+            content        => 1,
+            creation_time  => 1,
+            guid           => 1,
+            resource       => 1,
+            schema_version => 1,
+            type           => 1,
+            valid          => 1,
+            # still optional so we can manipulate anon facts -- dagolden, 2009-05-12
+            creator     => 0,
+            update_time => 0,
+        },
+    );
 
-  my $self = $fact_class->_init_guts($args);
+    my $self = $fact_class->_init_guts($args);
 
-  return $self;
+    return $self;
 }
 
 sub as_json {
-  my ($self) = @_;
-  return JSON->new->ascii->encode( $self->as_struct );
+    my ($self) = @_;
+    return JSON->new->ascii->encode( $self->as_struct );
 }
 
 sub from_json {
-  my ($class, $string) = @_;
-  my $struct = eval { JSON->new->ascii->decode( $string ) }
-    or Carp::confess "Error decoding JSON:\n$@";
-  return $class->from_struct( $struct );
+    my ( $class, $string ) = @_;
+    my $struct = eval { JSON->new->ascii->decode($string) }
+      or Carp::confess "Error decoding JSON:\n$@";
+    return $class->from_struct($struct);
 }
 
 sub save {
-  my ($self, $filename ) = @_;
-  my $class = ref($self);
-  open my $fh, ">", $filename
-    or Carp::confess "Error saving $class to '$filename'\: $!";
-  print {$fh} scalar $self->as_json;
-  close $fh;
-  return 1;
+    my ( $self, $filename ) = @_;
+    my $class = ref($self);
+    open my $fh, ">", $filename
+      or Carp::confess "Error saving $class to '$filename'\: $!";
+    print {$fh} scalar $self->as_json;
+    close $fh;
+    return 1;
 }
 
 sub load {
-  my ($class, $filename) = @_;
-  open my $fh, "<", $filename
-    or Carp::confess "Error loading fact from '$filename'\: $!";
-  my $string = do { local $/; <$fh> };
-  close $fh;
-  return $class->from_json($string);
+    my ( $class, $filename ) = @_;
+    open my $fh, "<", $filename
+      or Carp::confess "Error loading fact from '$filename'\: $!";
+    my $string = do { local $/; <$fh> };
+    close $fh;
+    return $class->from_json($string);
 }
 
 #--------------------------------------------------------------------------#
@@ -343,20 +344,20 @@ sub load {
 
 # type_from_class
 sub type {
-  my $self = shift;
-  my $type = ref $self || $self;
+    my $self = shift;
+    my $type = ref $self || $self;
 
-  $type =~ s{::}{-}g;
-  return $type;
+    $type =~ s{::}{-}g;
+    return $type;
 }
 
 # XXX: I'm not really excited about having this in here. -- rjbs, 2009-03-28
 # XXX: Need it ->type for symmetry.  Make it private? -- dagolden, 2009-03-31
 sub class_from_type {
-  my (undef, $type) = @_;
-  Carp::confess "can't get class from undef type" unless defined $type;
-  $type =~ s/-/::/g;
-  return $type;
+    my ( undef, $type ) = @_;
+    Carp::confess "can't get class from undef type" unless defined $type;
+    $type =~ s/-/::/g;
+    return $type;
 }
 
 #--------------------------------------------------------------------------#
@@ -375,30 +376,29 @@ sub default_schema_version { 1 }
 # abstract methods -- mostly fatal
 #--------------------------------------------------------------------------#
 
-sub content_metadata        { return +{} }
+sub content_metadata { return +{} }
 
-sub content_metadata_types  { return +{} }
+sub content_metadata_types { return +{} }
 
 sub upgrade_fact {
-  my ($self) = @_;
-  Carp::confess "Detected a schema mismatch, but upgrade_fact not implemented by "
-    . (ref $self || $self)
+    my ($self) = @_;
+    Carp::confess "Detected a schema mismatch, but upgrade_fact not implemented by "
+      . ( ref $self || $self );
 }
 
 sub content_as_bytes {
-  my ($self, $content) = @_;
-  Carp::confess "content_as_bytes not implemented by " . (ref $self || $self)
+    my ( $self, $content ) = @_;
+    Carp::confess "content_as_bytes not implemented by " . ( ref $self || $self );
 }
 
 sub content_from_bytes {
-  my ($self, $bytes) = @_;
-  Carp::confess "content_from_bytes not implemented by "
-    . (ref $self || $self)
+    my ( $self, $bytes ) = @_;
+    Carp::confess "content_from_bytes not implemented by " . ( ref $self || $self );
 }
 
 sub validate_content {
-  my ($self, $content) = @_;
-  Carp::confess "validate_content not implemented by " . (ref $self || $self)
+    my ( $self, $content ) = @_;
+    Carp::confess "validate_content not implemented by " . ( ref $self || $self );
 }
 
 1;

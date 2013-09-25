@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Report;
 # VERSION
 
@@ -15,19 +16,19 @@ our @ISA = qw/Metabase::Fact/;
 #--------------------------------------------------------------------------#
 
 sub report_spec {
-  my $self = shift;
-  Carp::confess "report_spec method not implemented by " . ref $self;
+    my $self = shift;
+    Carp::confess "report_spec method not implemented by " . ref $self;
 }
 
 sub set_creator {
-  my ($self, $uri) = @_;
+    my ( $self, $uri ) = @_;
 
-  $self->SUPER::set_creator($uri);
+    $self->SUPER::set_creator($uri);
 
-  for my $fact ($self->facts) {
-    $fact->set_creator($uri)
-      unless $fact->creator;
-  }
+    for my $fact ( $self->facts ) {
+        $fact->set_creator($uri)
+          unless $fact->creator;
+    }
 }
 
 #--------------------------------------------------------------------------#
@@ -39,73 +40,74 @@ sub set_creator {
 # stage?  Maybe we shouldn't let any fields be optional
 
 # XXX should probably refactor arg_spec for Fact->new so we can reuse it
-# and just make the content one optional.  -- dagolden, 2009-03-31 
+# and just make the content one optional.  -- dagolden, 2009-03-31
 
 sub open {
-  my ($class, @args) = @_;
-  
-  my $args = $class->__validate_args(
-    \@args,
-    { 
-      resource       => 1,
-      # still optional so we can manipulate anon facts -- dagolden, 2009-05-12
-      creator     => 0,
-      # helpful for constructing facts with non-random guids
-      guid => 0,
-    }
-  );
+    my ( $class, @args ) = @_;
 
-  $args->{content} ||= [];
+    my $args = $class->__validate_args(
+        \@args,
+        {
+            resource => 1,
+            # still optional so we can manipulate anon facts -- dagolden, 2009-05-12
+            creator => 0,
+            # helpful for constructing facts with non-random guids
+            guid => 0,
+        }
+    );
 
-  # create and check
-  my $self = $class->_init_guts($args);
+    $args->{content} ||= [];
 
-  return $self;
+    # create and check
+    my $self = $class->_init_guts($args);
+
+    return $self;
 }
 
 sub add {
-  my ($self, @args) = @_;
-  Carp::confess("report is already closed") if $self->{__closed};
+    my ( $self, @args ) = @_;
+    Carp::confess("report is already closed") if $self->{__closed};
 
-  my ($fact, $fact_class, $content );
-  
-  if ( @args == 1 && $args[0]->isa('Metabase::Fact') ) {
-    $fact = $args[0];
-  } else {
-    ($fact_class, $content) = @args;
-    $fact = $fact_class->new( 
-      resource => $self->resource->resource, 
-      content  => $content,
-    );
-  }
+    my ( $fact, $fact_class, $content );
 
-  $fact->set_creator($self->creator->resource) if $self->creator;
+    if ( @args == 1 && $args[0]->isa('Metabase::Fact') ) {
+        $fact = $args[0];
+    }
+    else {
+        ( $fact_class, $content ) = @args;
+        $fact = $fact_class->new(
+            resource => $self->resource->resource,
+            content  => $content,
+        );
+    }
 
-  push @{$self->{content}}, $fact;
-  return $self;
+    $fact->set_creator( $self->creator->resource ) if $self->creator;
+
+    push @{ $self->{content} }, $fact;
+    return $self;
 }
 
 # close just validates -- otherwise unnecessary
 sub close {
-  my ($self) = @_;
-  my $class = ref $self;
+    my ($self) = @_;
+    my $class = ref $self;
 
-  my $ok = eval { $self->validate_content; 1 };
-  unless ($ok) {
-    my $error = $@ || '(unknown error)';
-    Carp::confess( "$class object content invalid: $error" );
-  }
+    my $ok = eval { $self->validate_content; 1 };
+    unless ($ok) {
+        my $error = $@ || '(unknown error)';
+        Carp::confess("$class object content invalid: $error");
+    }
 
-  $self->{__closed} = 1;
+    $self->{__closed} = 1;
 
-  return $self;
+    return $self;
 }
 
-# accessor for facts -- this must work regardless of __closed so 
+# accessor for facts -- this must work regardless of __closed so
 # that facts can be added using content_meta of facts already added
 sub facts {
-  my ($self) = @_;
-  return @{ $self->content };
+    my ($self) = @_;
+    return @{ $self->content };
 }
 
 #--------------------------------------------------------------------------#
@@ -113,80 +115,81 @@ sub facts {
 #--------------------------------------------------------------------------#
 
 sub from_struct {
-  my ($class, $struct) = @_;
-  my $self = $class->SUPER::from_struct($struct);
-  $self->{__closed} = 1;
-  return $self;
+    my ( $class, $struct ) = @_;
+    my $self = $class->SUPER::from_struct($struct);
+    $self->{__closed} = 1;
+    return $self;
 }
 
-sub content_as_bytes { 
-  my $self = shift;
+sub content_as_bytes {
+    my $self = shift;
 
-  Carp::confess("can't serialize an open report") unless $self->{__closed};
+    Carp::confess("can't serialize an open report") unless $self->{__closed};
 
-  my $content = [ map { $_->as_struct } @{ $self->content } ];
-  my $encoded = eval { JSON->new->ascii->encode( $content ) };
-  Carp::confess $@ if $@;
-  return $encoded;
+    my $content = [ map { $_->as_struct } @{ $self->content } ];
+    my $encoded = eval { JSON->new->ascii->encode($content) };
+    Carp::confess $@ if $@;
+    return $encoded;
 }
 
-sub content_from_bytes { 
-  my ($self, $string) = @_;
-  $string = $$string if ref $string;
+sub content_from_bytes {
+    my ( $self, $string ) = @_;
+    $string = $$string if ref $string;
 
-  my $fact_structs = JSON->new->ascii->decode( $string );
+    my $fact_structs = JSON->new->ascii->decode($string);
 
-  my @facts;
-  for my $struct (@$fact_structs) {
-    my $class = $self->class_from_type( $struct->{metadata}{core}{type} );
-    my $fact = eval { $class->from_struct($struct) }
-      or Carp::confess "Unable to create a '$class' object: $@";
-    push @facts, $fact;
-  }
+    my @facts;
+    for my $struct (@$fact_structs) {
+        my $class = $self->class_from_type( $struct->{metadata}{core}{type} );
+        my $fact = eval { $class->from_struct($struct) }
+          or Carp::confess "Unable to create a '$class' object: $@";
+        push @facts, $fact;
+    }
 
-  return \@facts;
+    return \@facts;
 }
 
-# XXX what if spec is '0' (not '0+')?  -- dagolden, 2009-03-30 
+# XXX what if spec is '0' (not '0+')?  -- dagolden, 2009-03-30
 sub validate_content {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  my $spec    = $self->report_spec;
-  my $content = $self->content;
+    my $spec    = $self->report_spec;
+    my $content = $self->content;
 
-  die ref $self . " content must be an array reference of Fact object"
-    unless ref $content eq 'ARRAY';
+    die ref $self . " content must be an array reference of Fact object"
+      unless ref $content eq 'ARRAY';
 
-  my @fact_matched;
-  # check that each spec matches
-  for my $k ( keys %$spec ) {
-    $spec->{$k} =~ m{^(\d+)(\+)?$};
-    my $minimum = defined $1 ? $1 : 0;
-    my $exact   = defined $2 ?  0 : 1; # exact unless "+"
-    # mark facts that match a spec
-    my $found = 0;
-    for my $i ( 0 .. @$content - 1 ) {
-      if ( $content->[$i]->isa( $k ) ) {
-        $found++;
-        $fact_matched[$i] = 1;
-      }
+    my @fact_matched;
+    # check that each spec matches
+    for my $k ( keys %$spec ) {
+        $spec->{$k} =~ m{^(\d+)(\+)?$};
+        my $minimum = defined $1 ? $1 : 0;
+        my $exact   = defined $2 ? 0  : 1; # exact unless "+"
+        # mark facts that match a spec
+        my $found = 0;
+        for my $i ( 0 .. @$content - 1 ) {
+            if ( $content->[$i]->isa($k) ) {
+                $found++;
+                $fact_matched[$i] = 1;
+            }
+        }
+
+        if ($exact) {
+            die "expected $minimum of $k, but found $found\n"
+              if $found != $minimum;
+        }
+        else {
+            die "expected at least $minimum of $k, but found $found\n"
+              if $found < $minimum;
+        }
     }
 
-    if ( $exact ) {
-      die "expected $minimum of $k, but found $found\n"
-      if $found != $minimum;
-    } else {
-      die "expected at least $minimum of $k, but found $found\n"
-      if $found < $minimum;
-    }
-  }
+    # any facts that didn't match anything?
+    my $unmatched = grep { !$_ } @fact_matched;
+    die "$unmatched fact(s) not in the spec\n"
+      if $unmatched;
 
-  # any facts that didn't match anything?
-  my $unmatched = grep { ! $_ } @fact_matched;
-  die "$unmatched fact(s) not in the spec\n" 
-  if $unmatched;
-
-  return;
+    return;
 }
 
 #--------------------------------------------------------------------------#
@@ -194,15 +197,15 @@ sub validate_content {
 #--------------------------------------------------------------------------#
 
 sub fact_classes {
-  my ($self) = @_;
-  my $class = ref $self || $self;
-  return keys %{ $self->report_spec }
+    my ($self) = @_;
+    my $class = ref $self || $self;
+    return keys %{ $self->report_spec };
 }
 
 sub load_fact_classes {
-  my ($self) = @_;
-  $self->_load_fact_class( $_ ) for $self->fact_classes;
-  return;
+    my ($self) = @_;
+    $self->_load_fact_class($_) for $self->fact_classes;
+    return;
 }
 
 1;

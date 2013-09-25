@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Resource::perl;
 # VERSION
 
@@ -10,17 +11,17 @@ use Metabase::Resource;
 our @ISA = qw/Metabase::Resource/;
 
 sub _extract_type {
-  my ($self, $resource) = @_;
+    my ( $self, $resource ) = @_;
 
-  # determine type
-  # Possible types could be:
-  #  - commit
-  #  - tag -- not implemented
-  #  - tarball -- not implemented
-  my ($type) = $resource =~ m{\Aperl:///([^/]+)/};
-  Carp::confess("could not determine Metabase::Resource type from '$resource'\n")
-    unless defined $type && length $type;
-  return __PACKAGE__ . "::$type";
+    # determine type
+    # Possible types could be:
+    #  - commit
+    #  - tag -- not implemented
+    #  - tarball -- not implemented
+    my ($type) = $resource =~ m{\Aperl:///([^/]+)/};
+    Carp::confess("could not determine Metabase::Resource type from '$resource'\n")
+      unless defined $type && length $type;
+    return __PACKAGE__ . "::$type";
 }
 
 1;

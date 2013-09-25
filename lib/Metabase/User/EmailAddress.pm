@@ -1,12 +1,13 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::User::EmailAddress;
 # VERSION
 
 use Metabase::Fact::String;
 our @ISA = qw/Metabase::Fact::String/;
-  
+
 1;
 
 # ABSTRACT: Metabase fact for user email address

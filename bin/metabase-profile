@@ -2,6 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package metabase_profile; # dzil needs this
 # PODNAME: metabase-profile
 # ABSTRACT: create a metabase profile
@@ -14,58 +15,56 @@ use Metabase::User::Secret;
 use Pod::Usage;
 use IO::Prompt::Tiny qw(prompt);
 
-my (%profile, $help, $output, $full_name, $email_address, $password);
+my ( %profile, $help, $output, $full_name, $email_address, $password );
 my $result = GetOptions(
-  'help|h'      => \$help,
-  'output|o:s'  => \$output,
-  'name:s'      => \$full_name,
-  'email:s'     => \$email_address,
-  'secret:s'    => \$password,
+    'help|h'     => \$help,
+    'output|o:s' => \$output,
+    'name:s'     => \$full_name,
+    'email:s'    => \$email_address,
+    'secret:s'   => \$password,
 );
 
-pod2usage({-verbose => 2}) if ! $result || $help;
+pod2usage( { -verbose => 2 } ) if !$result || $help;
 
 # setup output file and confirm it doesn't exist
-if ( ! defined $output ) {
-  $output = "metabase_id.json";
+if ( !defined $output ) {
+    $output = "metabase_id.json";
 }
 if ( -f $output ) {
-  die "Won't over-write existing '$output' file.  Aborting.\n";
+    die "Won't over-write existing '$output' file.  Aborting.\n";
 }
 
 # get profile information
-$profile{full_name}     = $full_name      if defined $full_name;
-$profile{email_address} = $email_address  if defined $email_address;
-$profile{password}      = $password       if defined $password;
+$profile{full_name}     = $full_name     if defined $full_name;
+$profile{email_address} = $email_address if defined $email_address;
+$profile{password}      = $password      if defined $password;
 
 my @prompts = (
-  full_name     => 'full name',
-  email_address => 'email address',
-  password      => 'password/secret',
+    full_name     => 'full name',
+    email_address => 'email address',
+    password      => 'password/secret',
 );
 
 while (@prompts) {
-  my ($key, $phrase) = splice(@prompts,0,2);
-  next if $profile{$key};
-  chomp( my $answer = prompt("Enter $phrase\: ") );
-  $profile{$key} = $answer;
+    my ( $key, $phrase ) = splice( @prompts, 0, 2 );
+    next if $profile{$key};
+    chomp( my $answer = prompt("Enter $phrase\: ") );
+    $profile{$key} = $answer;
 }
 
 # create profile and secret objects
 $password = delete $profile{password};
-my $profile = Metabase::User::Profile->create( %profile );
-my $secret = Metabase::User::Secret->new(
-  resource => $profile->resource,
-  content  => $password,
+my $profile = Metabase::User::Profile->create(%profile);
+my $secret  = Metabase::User::Secret->new(
+    resource => $profile->resource,
+    content  => $password,
 );
 
 # write output
 print "Writing profile to '$output'\n";
 open my $fh, ">", $output;
-print {$fh} JSON->new->ascii->pretty->encode([
-  $profile->as_struct,
-  $secret->as_struct,
-]);
+print {$fh}
+  JSON->new->ascii->pretty->encode( [ $profile->as_struct, $secret->as_struct, ] );
 close $fh;
 chmod 0600, $output;
 

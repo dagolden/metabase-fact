@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::User::Secret;
 # VERSION
 
@@ -8,10 +9,10 @@ use Metabase::Fact::String;
 our @ISA = qw/Metabase::Fact::String/;
 
 sub new {
-  my $class = shift;
-  my $self = $class->SUPER::new(@_);
-  $self->set_creator($self->resource) unless $self->creator;
-  return $self;
+    my $class = shift;
+    my $self  = $class->SUPER::new(@_);
+    $self->set_creator( $self->resource ) unless $self->creator;
+    return $self;
 }
 
 1;

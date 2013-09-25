@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::User::Profile;
 # VERSION
 
@@ -17,30 +18,30 @@ __PACKAGE__->load_fact_classes;
 #--------------------------------------------------------------------------#
 
 sub create {
-  my ($class, @args) = @_;
-  my $args = $class->__validate_args(
-    \@args,
-    { 
-      full_name       => 1,
-      email_address   => 1,
-    }
-  );
+    my ( $class, @args ) = @_;
+    my $args = $class->__validate_args(
+        \@args,
+        {
+            full_name     => 1,
+            email_address => 1,
+        }
+    );
 
-  # resource string must reference our own guid, so pregenerate it
-  my $guid = lc _guid();
-  my $profile = $class->open(
-    guid      => $guid,
-    resource  => "metabase:user:$guid",
-  );
+    # resource string must reference our own guid, so pregenerate it
+    my $guid    = lc _guid();
+    my $profile = $class->open(
+        guid     => $guid,
+        resource => "metabase:user:$guid",
+    );
 
-  # we are our own creator
-  $profile->set_creator($profile->resource);
+    # we are our own creator
+    $profile->set_creator( $profile->resource );
 
-  # add facts
-  $profile->add( 'Metabase::User::FullName' => $args->{full_name} );
-  $profile->add( 'Metabase::User::EmailAddress' => $args->{email_address} );
-  $profile->close;
-  return $profile;
+    # add facts
+    $profile->add( 'Metabase::User::FullName'     => $args->{full_name} );
+    $profile->add( 'Metabase::User::EmailAddress' => $args->{email_address} );
+    $profile->close;
+    return $profile;
 }
 
 #--------------------------------------------------------------------------#
@@ -48,20 +49,20 @@ sub create {
 #--------------------------------------------------------------------------#
 
 sub validate_resource {
-  my ($self) = shift;
-  my $resource = $self->SUPER::validate_resource(@_);
-  my ($guid) = $resource->guid;
-  Carp::confess "resource guid differs from fact guid" if $guid ne $self->guid;
-  return $resource;
+    my ($self)   = shift;
+    my $resource = $self->SUPER::validate_resource(@_);
+    my ($guid)   = $resource->guid;
+    Carp::confess "resource guid differs from fact guid" if $guid ne $self->guid;
+    return $resource;
 }
 
-sub report_spec { 
-  return {
-    'Metabase::User::FullName'      => '1',
-    'Metabase::User::EmailAddress'  => '1+',
-  }
+sub report_spec {
+    return {
+        'Metabase::User::FullName'     => '1',
+        'Metabase::User::EmailAddress' => '1+',
+    };
 }
-  
+
 1;
 
 # ABSTRACT: Metabase report class for user-related facts

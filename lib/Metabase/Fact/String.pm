@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Fact::String;
 # VERSION
 
@@ -9,25 +10,25 @@ use Carp ();
 use Metabase::Fact;
 our @ISA = qw/Metabase::Fact/;
 
-# document that content must be characters, not bytes -- dagolden, 2009-03-28 
+# document that content must be characters, not bytes -- dagolden, 2009-03-28
 
 sub validate_content {
-  my ($self) = @_;
-  Carp::confess "content must be scalar value" 
-    unless defined $self->content && ref \($self->content) eq 'SCALAR';
+    my ($self) = @_;
+    Carp::confess "content must be scalar value"
+      unless defined $self->content && ref \( $self->content ) eq 'SCALAR';
 }
 
 sub content_as_bytes {
-  my ($self) = @_;
-  my $bytes = $self->content;
-  utf8::encode($bytes) if $] ge '5.008'; # converts in-place
-  return $bytes;
+    my ($self) = @_;
+    my $bytes = $self->content;
+    utf8::encode($bytes) if $] ge '5.008'; # converts in-place
+    return $bytes;
 }
 
-sub content_from_bytes { 
-  my ($class, $bytes) = @_;
-  utf8::decode($bytes) if $] ge '5.008'; # converts in-place
-  return $bytes;
+sub content_from_bytes {
+    my ( $class, $bytes ) = @_;
+    utf8::decode($bytes) if $] ge '5.008'; # converts in-place
+    return $bytes;
 }
 
 1;

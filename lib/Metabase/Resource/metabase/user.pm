@@ -1,9 +1,9 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Resource::metabase::user;
 # VERSION
-
 
 use Metabase::Resource::metabase::fact;
 our @ISA = qw/Metabase::Resource::metabase::fact/;

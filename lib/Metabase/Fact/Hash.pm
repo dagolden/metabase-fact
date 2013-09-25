@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Fact::Hash;
 # VERSION
 
@@ -11,31 +12,31 @@ use Metabase::Fact;
 our @ISA = qw/Metabase::Fact/;
 
 sub validate_content {
-  my ($self) = @_;
-  my $content = $self->content;
-  my $class = ref $self;
-  Carp::confess "content must be a hashref"
-    unless ref $content eq 'HASH';
-  my $get_req =$self->can('required_keys') || sub { () };
-  my $get_opt =$self->can('optional_keys') || sub { () };
-  # find missing
-  my @missing =  grep { ! exists $content->{$_} } $get_req->();
-  Carp::croak "missing required keys for $class\: @missing\n" if @missing;
-  # check for invalid
-  my %valid = map { $_ => 1 } ($get_req->(), $get_opt->());
-  my @invalid = grep { ! exists $valid{$_} } keys %$content;
-  Carp::croak "invalid keys for $class\: @invalid\n" if @invalid;
-  return 1;
+    my ($self)  = @_;
+    my $content = $self->content;
+    my $class   = ref $self;
+    Carp::confess "content must be a hashref"
+      unless ref $content eq 'HASH';
+    my $get_req = $self->can('required_keys') || sub { () };
+    my $get_opt = $self->can('optional_keys') || sub { () };
+    # find missing
+    my @missing = grep { !exists $content->{$_} } $get_req->();
+    Carp::croak "missing required keys for $class\: @missing\n" if @missing;
+    # check for invalid
+    my %valid = map { $_ => 1 } ( $get_req->(), $get_opt->() );
+    my @invalid = grep { !exists $valid{$_} } keys %$content;
+    Carp::croak "invalid keys for $class\: @invalid\n" if @invalid;
+    return 1;
 }
 
 sub content_as_bytes {
-  my ($self) = @_;
-  return JSON->new->ascii->encode($self->content);
+    my ($self) = @_;
+    return JSON->new->ascii->encode( $self->content );
 }
 
 sub content_from_bytes {
-  my ($class, $bytes) = @_;
-  return JSON->new->ascii->decode($bytes);
+    my ( $class, $bytes ) = @_;
+    return JSON->new->ascii->decode($bytes);
 }
 
 1;

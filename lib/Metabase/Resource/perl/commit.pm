@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Resource::perl::commit;
 # VERSION
 
@@ -10,25 +11,23 @@ use Metabase::Resource::perl;
 our @ISA = qw/Metabase::Resource::perl/;
 
 sub _metadata_types {
-  return {
-    sha1          => '//str',
-  };
+    return { sha1 => '//str', };
 }
 
 sub _init {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  my ($string) = $self =~ m{\Aperl:///commit/(.+)\z};
-  Carp::confess("could not determine commit from '$self'\n")
-    unless defined $string && length $string;
+    my ($string) = $self =~ m{\Aperl:///commit/(.+)\z};
+    Carp::confess("could not determine commit from '$self'\n")
+      unless defined $string && length $string;
 
-  my $sha1 = $1;
-  Carp::confess("illegal commit hash")
-    unless $sha1 =~ m/^[a-f0-9]+$/;
+    my $sha1 = $1;
+    Carp::confess("illegal commit hash")
+      unless $sha1 =~ m/^[a-f0-9]+$/;
 
-  $self->_add( 'sha1' => $sha1 );
+    $self->_add( 'sha1' => $sha1 );
 
-  return $self;
+    return $self;
 }
 
 =method full_url
@@ -42,9 +41,9 @@ L<http://perl5.git.perl.org>.
 =cut
 
 sub full_url {
-  my ($self, $host) = @_;
-  $host ||= 'perl5.git.perl.org';
-  return "http://${host}/perl.git/" . $self->sha1;
+    my ( $self, $host ) = @_;
+    $host ||= 'perl5.git.perl.org';
+    return "http://${host}/perl.git/" . $self->sha1;
 }
 
 # 'commit' validates during _init, really

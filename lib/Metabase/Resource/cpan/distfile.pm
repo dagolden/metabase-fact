@@ -1,43 +1,44 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Resource::cpan::distfile;
 # VERSION
 
-use Carp ();
+use Carp               ();
 use CPAN::DistnameInfo ();
 
 use Metabase::Resource::cpan;
 our @ISA = qw/Metabase::Resource::cpan/;
 
 sub _metadata_types {
-  return {
-    cpan_id       => '//str',
-    dist_file     => '//str',
-    dist_name     => '//str',
-    dist_version  => '//str',
-  }
+    return {
+        cpan_id      => '//str',
+        dist_file    => '//str',
+        dist_name    => '//str',
+        dist_version => '//str',
+    };
 }
 
 sub _init {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  # determine subtype
-  my ($string) = $self =~ m{\Acpan:///distfile/(.+)\z};
-  Carp::confess("could not determine distfile from '$self'\n")
-    unless defined $string && length $string;
+    # determine subtype
+    my ($string) = $self =~ m{\Acpan:///distfile/(.+)\z};
+    Carp::confess("could not determine distfile from '$self'\n")
+      unless defined $string && length $string;
 
-  my $data = $self->_validate_distfile($string);
-  for my $k ( keys %$data ) {
-    $self->_add( $k => $data->{$k} );
-  }
-  return $self;
+    my $data = $self->_validate_distfile($string);
+    for my $k ( keys %$data ) {
+        $self->_add( $k => $data->{$k} );
+    }
+    return $self;
 }
 
 # distfile validates during _init, really
 sub validate { 1 }
 
-# XXX should really validate AUTHOR/DISTNAME-DISTVERSION.SUFFIX 
+# XXX should really validate AUTHOR/DISTNAME-DISTVERSION.SUFFIX
 # -- dagolden, 2010-01-27
 #
 # my $suffix = qr{\.(?:tar\.(?:bz2|gz|Z)|t(?:gz|bz)|zip)};
@@ -47,31 +48,31 @@ sub validate { 1 }
 
 # map DistnameInfo calls to our names
 my %distfile_map = (
-  cpanid  => 'cpan_id',
-  dist    => 'dist_name',
-  version => 'dist_version',
+    cpanid  => 'cpan_id',
+    dist    => 'dist_name',
+    version => 'dist_version',
 );
 
 sub _validate_distfile {
-  my ($self, $string) = @_;
-  my $two = substr($string,0,2);
-  my $one = substr($two,0,1);
-  my $path = "authors/id/$one/$two/$string";
-  my $d = eval { CPAN::DistnameInfo->new($path) };
-  my $bad = defined $d ? 0 : 1;
+    my ( $self, $string ) = @_;
+    my $two = substr( $string, 0, 2 );
+    my $one = substr( $two,    0, 1 );
+    my $path = "authors/id/$one/$two/$string";
+    my $d    = eval { CPAN::DistnameInfo->new($path) };
+    my $bad  = defined $d ? 0 : 1;
 
-  my $cache = { dist_file => $string };
+    my $cache = { dist_file => $string };
 
-  for my $k ( $bad ? () : (keys %distfile_map) ) {
-    my $value = $d->$k;
-    defined $value or $bad++ and last;
-    $cache->{$distfile_map{$k}} = $value
-  }
+    for my $k ( $bad ? () : ( keys %distfile_map ) ) {
+        my $value = $d->$k;
+        defined $value or $bad++ and last;
+        $cache->{ $distfile_map{$k} } = $value;
+    }
 
-  if ($bad) {
-    Carp::confess("'$string' can't be parsed as a CPAN distfile");
-  }
-  return $cache;
+    if ($bad) {
+        Carp::confess("'$string' can't be parsed as a CPAN distfile");
+    }
+    return $cache;
 }
 
 1;

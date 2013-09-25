@@ -1,6 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
+
 package Metabase::Resource;
 # VERSION
 
@@ -10,101 +11,103 @@ use Carp ();
 # main API methods -- shouldn't be overridden
 #--------------------------------------------------------------------------#
 
-use overload ('""'     => sub { $_[0]->resource },
-              '=='     => sub { _obj_eq(@_) },
-              '!='     => sub { !_obj_eq(@_) },
-              fallback => 1,
-             );
+use overload (
+    '""'     => sub { $_[0]->resource },
+    '=='     => sub { _obj_eq(@_) },
+    '!='     => sub { !_obj_eq(@_) },
+    fallback => 1,
+);
 
 # Check if two objects are the same object
 sub _obj_eq {
-    return overload::StrVal($_[0]) eq overload::StrVal($_[1]);
+    return overload::StrVal( $_[0] ) eq overload::StrVal( $_[1] );
 }
 
-my $id_re = qr/[_a-z]+/i;
+my $id_re    = qr/[_a-z]+/i;
 my $class_re = qr/^$id_re(?:::$id_re)*$/;
+
 sub _load {
-  my ($class,$subclass) = @_;
-  unless ( $subclass =~ $class_re ) {
-    Carp::confess "'$subclass' does not look like a class name";
-  }
-  eval "require $subclass; 1" ## no critic
-    or Carp::confess("Could not load '$subclass': $@");
+    my ( $class, $subclass ) = @_;
+    unless ( $subclass =~ $class_re ) {
+        Carp::confess "'$subclass' does not look like a class name";
+    }
+    eval "require $subclass; 1" ## no critic
+      or Carp::confess("Could not load '$subclass': $@");
 }
 
 my %installed;
 
 sub _add {
-  my ($self, $name, $value) = @_;
-  $self->{metadata}{$name} = $value;
-  my $method = ref($self) . "::$name";
-  if ( ! $installed{$method} ) {
-    no strict 'refs'; ## no critic
-    *{$method} = sub { return $_[0]->{metadata}{$name} };
-    $installed{$method}++;
-  }
-  return;
+    my ( $self, $name, $value ) = @_;
+    $self->{metadata}{$name} = $value;
+    my $method = ref($self) . "::$name";
+    if ( !$installed{$method} ) {
+        no strict 'refs';       ## no critic
+        *{$method} = sub { return $_[0]->{metadata}{$name} };
+        $installed{$method}++;
+    }
+    return;
 }
 
 sub _type {
-  my ($self) = @_;
-  my $class = ref $self || $self;
-  $class =~ s{::}{-}g;
-  return $class;
+    my ($self) = @_;
+    my $class = ref $self || $self;
+    $class =~ s{::}{-}g;
+    return $class;
 }
 
 sub new {
-  my ($class, $resource) = @_;
-  Carp::confess("no resource string provided")
-    unless defined $resource && length $resource;
+    my ( $class, $resource ) = @_;
+    Carp::confess("no resource string provided")
+      unless defined $resource && length $resource;
 
-  if ( ref $resource && eval {$resource->isa('Metabase::Resource')} ) {
-    $resource = $resource->resource;
-  }
+    if ( ref $resource && eval { $resource->isa('Metabase::Resource') } ) {
+        $resource = $resource->resource;
+    }
 
-  # parse scheme
-  my ($scheme) = $resource =~ m{\A([^:]+):};
-  Carp::confess("could not determine URI scheme from '$resource'\n")
-    unless defined $scheme && length $scheme;
+    # parse scheme
+    my ($scheme) = $resource =~ m{\A([^:]+):};
+    Carp::confess("could not determine URI scheme from '$resource'\n")
+      unless defined $scheme && length $scheme;
 
-  my $schema_class = "Metabase::Resource::$scheme";
-  $class->_load($schema_class);
-  my $type_class = $schema_class->_extract_type($resource);
-  $class->_load($type_class);
+    my $schema_class = "Metabase::Resource::$scheme";
+    $class->_load($schema_class);
+    my $type_class = $schema_class->_extract_type($resource);
+    $class->_load($type_class);
 
-  # construct object
-  my $self = bless {
-    resource => $resource,
-    metadata  => {},
-  }, $type_class;
-  if ( $self->can('_init') ) {
-    $self->_init;
-  }
+    # construct object
+    my $self = bless {
+        resource => $resource,
+        metadata => {},
+    }, $type_class;
+    if ( $self->can('_init') ) {
+        $self->_init;
+    }
 
-  $self->_add( type => $self->_type );
-  $self->validate;
-  return $self;
+    $self->_add( type => $self->_type );
+    $self->validate;
+    return $self;
 }
 
 # Don't cause segfault with perl-5.6.1 by
 # overloading undef stuff...
 sub resource {
-  return '' unless ref $_[0] && defined $_[0]->{resource};
-  return "$_[0]->{resource}";
+    return '' unless ref $_[0] && defined $_[0]->{resource};
+    return "$_[0]->{resource}";
 }
 
 # return a copy
 sub metadata {
-  my ($self) = @_;
-  return { %{$self->{metadata} || {}} };
+    my ($self) = @_;
+    return { %{ $self->{metadata} || {} } };
 }
 
 sub metadata_types {
-  my ($self) = @_;
-  return {
-    'type' => '//str',
-    %{$self->_metadata_types || {}}
-  };
+    my ($self) = @_;
+    return {
+        'type' => '//str',
+        %{ $self->_metadata_types || {} }
+    };
 }
 
 #--------------------------------------------------------------------------#
@@ -112,8 +115,8 @@ sub metadata_types {
 #--------------------------------------------------------------------------#
 
 sub validate {
-  my ($self) = @_;
-  Carp::confess "validate not implemented by " . (ref $self || $self)
+    my ($self) = @_;
+    Carp::confess "validate not implemented by " . ( ref $self || $self );
 }
 
 1;
