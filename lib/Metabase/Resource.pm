@@ -201,7 +201,7 @@ of the URI into relevant index metadata.
 
 Subclasses SHOULD NOT implement a C<new> constructor, as the Metabase::Resource
 constructor will load the subclass, construct the object, bless the object
-into the subclass, and and then call C<validate> on the object.  Subclasses
+into the subclass, and then call C<validate> on the object.  Subclasses
 MAY store structured data derived from the content string during validation.
 
 Subclasses SHOULD use the C<content> method to access the resource string and

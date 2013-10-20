@@ -92,7 +92,7 @@ Valid options include:
   -h, --help              print man page
 
 If no output file name is given, the default name 'metabase_id.json' will be
-used.  If the the output filename (or default) exists, the program will abort
+used.  If the output filename (or default) exists, the program will abort
 rather than overwrite the file.  The output file will be in JSON and contain
 the user profile and the user's shared secret.
 
