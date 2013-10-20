@@ -277,7 +277,7 @@ sub from_struct {
     my $metadata  = $struct->{metadata};
     my $core_meta = $metadata->{core};
 
-    # transfrom struct into content and core metadata arguments the way they
+    # transform struct into content and core metadata arguments the way they
     # would be given to new, then validate these and get an object from
     # _init_guts
     my @args = (
