@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 use Test::More 0.88;
-use Test::Exception;
+use Test::Fatal;
 
 use lib 't/lib';
 use Test::Metabase::StringFact;
@@ -27,8 +27,7 @@ my ( $obj, $err );
 # required parameters missing
 #--------------------------------------------------------------------------#
 
-eval { $obj = Metabase::Fact->new() };
-$err = $@;
+$err = exception { $obj = Metabase::Fact->new() };
 like( $err, qr/missing required/, "new() without params throws error" );
 for my $p (qw/ resource content /) {
     like( $err, qr/$p/, "... '$p' noted missing" );
@@ -46,8 +45,8 @@ is( Metabase::Fact->type, "Metabase-Fact", "->type converts class name" );
 # unimplemented
 for my $m (qw/content_as_bytes content_from_bytes validate_content/) {
     my $obj = bless {} => 'Metabase::Fact';
-    eval { $obj->$m };
-    like( $@, qr/$m not implemented by Metabase::Fact/, "$m not implemented" );
+    $err = exception { $obj->$m };
+    like( $err, qr/$m not implemented by Metabase::Fact/, "$m not implemented" );
 }
 
 #--------------------------------------------------------------------------#
@@ -61,12 +60,12 @@ my $args = {
     content  => $string,
 };
 
-lives_ok { $obj = Test::Metabase::StringFact->new($args) }
+is exception { $obj = Test::Metabase::StringFact->new($args) }, undef,
 "new( <hashref> ) doesn't die";
 
 isa_ok( $obj, 'Test::Metabase::StringFact' );
 
-lives_ok { $obj = Test::Metabase::StringFact->new(%$args) }
+is exception { $obj = Test::Metabase::StringFact->new(%$args) }, undef,
 "new( <list> ) doesn't die";
 
 isa_ok( $obj, 'Test::Metabase::StringFact' );
@@ -78,15 +77,15 @@ is( $obj->content, $string, "object content correct" );
 # class validation
 #--------------------------------------------------------------------------#
 
-eval { $obj->_load_fact_class("Cwd;die 'Insecure'!"); };
+$err = exception { $obj->_load_fact_class("Cwd;die 'Insecure'!"); };
 like(
-    $@,
+    $err,
     qr/does not look like a class name/,
     "fact class loading validates class name"
 );
-eval { $obj->resource->_load("Cwd;die 'Insecure'!"); };
+$err = exception { $obj->resource->_load("Cwd;die 'Insecure'!"); };
 like(
-    $@,
+    $err,
     qr/does not look like a class name/,
     "fact class loading validates class name"
 );

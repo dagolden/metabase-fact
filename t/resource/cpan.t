@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 
 use lib 't/lib';
 
@@ -26,9 +26,8 @@ my ( $obj, $err );
 # required parameters missing
 #--------------------------------------------------------------------------#
 
-eval { $obj = Metabase::Resource->new() };
-$err = $@;
-like( $err, qr/no resource string provided/, "new() without string throws error" );
+$err = exception { $obj = Metabase::Resource->new() };
+like $err, qr/no resource string provided/, "new() without string throws error";
 
 #--------------------------------------------------------------------------#
 # new should create proper subtype object
@@ -36,7 +35,7 @@ like( $err, qr/no resource string provided/, "new() without string throws error"
 
 my $string = "cpan:///distfile/JOHNDOE/Foo-Bar-1.23.tar.gz";
 
-lives_ok { $obj = Metabase::Resource->new($string) }
+is exception { $obj = Metabase::Resource->new($string) }, undef,
 "Metabase::Resource->new(\$string) should not die";
 
 isa_ok( $obj, 'Metabase::Resource::cpan' );

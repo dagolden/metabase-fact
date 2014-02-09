@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 
 use lib 't/lib';
 
@@ -27,9 +27,8 @@ my ( $obj, $err );
 # required parameters missing
 #--------------------------------------------------------------------------#
 
-eval { $obj = Metabase::Resource->new() };
-$err = $@;
-like( $err, qr/no resource string provided/, "new() without string throws error" );
+$err = exception { $obj = Metabase::Resource->new() };
+like $err, qr/no resource string provided/, "new() without string throws error";
 
 #--------------------------------------------------------------------------#
 # fake an object and test methods
@@ -38,13 +37,13 @@ like( $err, qr/no resource string provided/, "new() without string throws error"
 # unimplemented
 for my $m (qw/validate/) {
     my $obj = bless {} => 'Metabase::Resource';
-    eval { $obj->$m };
-    like( $@, qr/$m not implemented by Metabase::Resource/, "$m not implemented" );
+    $err = exception { $obj->$m };
+    like $err, qr/$m not implemented by Metabase::Resource/, "$m not implemented";
 }
 
 # bad schema
-eval { $obj = Metabase::Resource->new("noschema") };
-like( $@, qr/could not determine URI scheme from/, "no schema found" );
+$err = exception { $obj = Metabase::Resource->new("noschema") };
+like $err, qr/could not determine URI scheme from/, "no schema found";
 
 #--------------------------------------------------------------------------#
 # new should create proper subtype object
@@ -52,7 +51,7 @@ like( $@, qr/could not determine URI scheme from/, "no schema found" );
 
 my $string = "metabase:user:b66c7662-1d34-11de-a668-0df08d1878c0";
 
-lives_ok { $obj = Metabase::Resource->new($string) }
+is exception { $obj = Metabase::Resource->new($string) }, undef,
 "Metabase::Resource->new(\$string) should not die";
 
 isa_ok( $obj, 'Metabase::Resource::metabase' );

@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 
 use lib 't/lib';
 
@@ -31,12 +31,12 @@ my $args = {
     content  => $string,
 };
 
-lives_ok { $obj = FactThree->new($args) } "new( <hashref> ) doesn't die";
+is exception { $obj = FactThree->new($args) }, undef, "new( <hashref> ) doesn't die";
 
 isa_ok( $obj, 'Metabase::Fact::String' );
 
 my $test_guid = "b4ac3de6-15bb-11df-b44d-0018f34ec37c";
-lives_ok { $obj = FactThree->new( %$args, guid => $test_guid ) }
+is exception { $obj = FactThree->new( %$args, guid => $test_guid ) }, undef,
 "new( <list> ) doesn't die";
 
 isa_ok( $obj, 'Metabase::Fact::String' );

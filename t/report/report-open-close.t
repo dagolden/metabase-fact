@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use lib 't/lib';
 
 plan tests => 15;
@@ -36,65 +36,65 @@ my ( $obj, $err );
 # report that takes 1 fact
 #--------------------------------------------------------------------------#
 
-lives_ok {
+is exception {
     $obj = JustOneFact->open(%params);
-}
+}, undef,
 "lives: open() given no facts";
 
 isa_ok( $obj, 'JustOneFact' );
 
-lives_ok {
+is exception {
     $obj->add( 'FactOne' => 'This is FactOne' );
-}
+}, undef,
 "lives: add( 'Class' => 'foo' )";
 
-lives_ok {
+is exception {
     $obj->close;
-}
+}, undef,
 "lives: close()";
 
 #--------------------------------------------------------------------------#
 # add takes a fact directly
 #--------------------------------------------------------------------------#
 
-lives_ok {
+is exception {
     $obj = JustOneFact->open(%params);
-}
+}, undef,
 "lives: open() given no facts";
 
 isa_ok( $obj, 'JustOneFact' );
 
-lives_ok {
+is exception {
     $obj->add( $facts{FactOne} );
-}
+}, undef,
 "lives: add( \$fact )";
 
-lives_ok {
+is exception {
     $obj->close;
-}
+}, undef,
 "lives: close()";
 
 #--------------------------------------------------------------------------#
 # errors
 #--------------------------------------------------------------------------#
 
-lives_ok {
+is exception {
     $obj = JustOneFact->open(%params);
-}
+}, undef,
 "lives: open() given no facts";
 
 isa_ok( $obj, 'JustOneFact' );
 
-lives_ok {
+is exception {
     $obj->add( 'FactOne' => 'This is FactOne' );
-}
+}, undef,
 "lives: add( 'Class' => 'foo' )";
 
-lives_ok {
+is exception {
     $obj->add( 'FactTwo' => 'This is FactTwo' );
-}
+}, undef,
 "lives: add( 'Class2' => 'foo' )";
 
-eval { $obj->close };
-like( $@, qr/content invalid/, "dies: close() with two facts" );
+$err = exception { $obj->close };
+like $err, qr/content invalid/, "dies: close() with two facts";
 

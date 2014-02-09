@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 
 use lib 't/lib';
 
@@ -26,9 +26,8 @@ my ( $obj, $err );
 # required parameters missing
 #--------------------------------------------------------------------------#
 
-eval { $obj = Metabase::Resource->new() };
-$err = $@;
-like( $err, qr/no resource string provided/, "new() without string throws error" );
+like( exception { $obj = Metabase::Resource->new() },
+qr/no resource string provided/, "new() without string throws error" );
 
 #--------------------------------------------------------------------------#
 # new should create proper subtype object
@@ -37,7 +36,7 @@ like( $err, qr/no resource string provided/, "new() without string throws error"
 my $sha1   = "8c57606294f48eb065dff03f7ffefc1e4e2cdce4";
 my $string = "perl:///commit/$sha1";
 
-lives_ok { $obj = Metabase::Resource->new($string) }
+is exception { $obj = Metabase::Resource->new($string) }, undef,
 "Metabase::Resource->new(\$string) should not die";
 
 isa_ok( $obj, 'Metabase::Resource::perl' );

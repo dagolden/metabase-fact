@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use lib 't/lib';
 
 plan tests => 13;
@@ -36,21 +36,21 @@ my ( $report, $err );
 # report that takes 1 fact
 #--------------------------------------------------------------------------#
 
-lives_ok {
+is exception {
     $report = JustOneFact->open(%params);
-}
-"lives: open() given no facts";
+}, undef,
+": open() given no facts";
 
 isa_ok( $report, 'JustOneFact' );
 
-lives_ok {
+is exception {
     $report->add( 'FactOne' => 'This is FactOne' );
-}
+}, undef,
 "lives: add( 'Class' => 'foo' )";
 
-lives_ok {
+is exception {
     $report->close;
-}
+}, undef,
 "lives: close()";
 
 #--------------------------------------------------------------------------#
@@ -60,9 +60,9 @@ lives_ok {
 my $class = ref $report;
 
 my $report2;
-lives_ok {
+is exception {
     $report2 = $class->from_struct( $report->as_struct );
-}
+}, undef,
 "lives: as_struct->from_struct";
 
 isa_ok( $report2, $class );
