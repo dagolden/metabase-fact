@@ -8,7 +8,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use lib 't/lib';
 
 plan tests => 9;
@@ -36,52 +36,52 @@ my ( $obj, $err );
 # report that takes 1 fact
 #--------------------------------------------------------------------------#
 
-lives_ok {
+is exception {
     $obj = JustOneFact->new( %params, content => [ $facts{FactOne} ] );
-}
+}, undef,
 "lives: new() takes 1 fact, and given 1 fact";
 
-dies_ok {
+isnt exception {
     $obj = JustOneFact->new( %params, content => [] );
-}
+}, undef,
 "dies: new() takes 1 fact, but given none";
 
-dies_ok {
+isnt exception {
     $obj = JustOneFact->new( %params, content => [ @facts{qw/FactOne FactTwo/} ] );
-}
+}, undef,
 "dies: new() takes 1 fact, but given 2 facts";
 
 #--------------------------------------------------------------------------#
 # report that takes 1+ facts
 #--------------------------------------------------------------------------#
 
-lives_ok {
+is exception {
     $obj = OneOrMoreFacts->new( %params, content => [ @facts{qw/FactOne FactTwo/} ] );
-}
+}, undef,
 "lives: new() takes 1+ fact, and given 2 facts";
 
 #--------------------------------------------------------------------------#
 # report that takes 1 of each
 #--------------------------------------------------------------------------#
 
-lives_ok {
+is exception {
     $obj = OneOfEach->new( %params, content => [ @facts{qw/FactOne FactTwo/} ] );
-}
+}, undef,
 "lives: new() takes 1 of each, given 1 of each";
 
-dies_ok {
+isnt exception {
     $obj = OneOfEach->new( %params, content => [ @facts{qw/FactOne FactOne/} ] );
-}
+}, undef,
 "dies: new() takes 1 of each, given 2 of one kind";
 
 #--------------------------------------------------------------------------#
 # report that takes 1 of each
 #--------------------------------------------------------------------------#
 
-lives_ok {
+is exception {
     $obj =
       OneSpecificAtLeastThreeTotal->new( %params,
         content => [ @facts{qw/FactOne FactTwo FactTwo/} ] );
-}
+}, undef,
 "lives: new() takes 1 specific 3 total, given correctly";
 

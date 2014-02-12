@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use File::Spec;
 use File::Temp 0.20;
 use Cwd;
@@ -45,12 +45,12 @@ require_ok('Metabase::User::Secret');
 
 my $profile;
 
-lives_ok {
+is exception {
     $profile = Metabase::User::Profile->create(
         full_name     => "J\x{022f}hn Doe",
         email_address => 'jdoe@example.com',
     );
-}
+}, undef,
 "create new profile";
 
 isa_ok( $profile, 'Metabase::User::Profile' );

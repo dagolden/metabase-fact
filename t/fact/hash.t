@@ -9,7 +9,7 @@ use warnings;
 
 use Data::GUID qw/guid_string/;
 use Test::More;
-use Test::Exception;
+use Test::Fatal;
 use JSON 2 ();
 
 use lib 't/lib';
@@ -43,25 +43,25 @@ my $test_args = {
     content  => {},
 };
 
-eval { $obj = FactFour->new($test_args) };
-like( $@, qr/missing required keys.+?first/, 'missing required dies' );
+$err = exception { $obj = FactFour->new($test_args) };
+like( $err, qr/missing required keys.+?first/, 'missing required dies' );
 
 $test_args->{content}{first} = undef;
 
-lives_ok { $obj = FactFour->new($test_args) } "undef required field is OK";
+is exception { $obj = FactFour->new($test_args) }, undef, "undef required field is OK";
 
 $test_args->{content}{first} = 1;
 
-lives_ok { $obj = FactFour->new($test_args) } "new( <hashref> ) doesn't die";
+is exception { $obj = FactFour->new($test_args) }, undef, "new( <hashref> ) doesn't die";
 
 $test_args->{content}{third} = 3;
 
-eval { $obj = FactFour->new($test_args) };
-like( $@, qr/invalid keys.+?third/, 'invalid key dies' );
+$err = exception { $obj = FactFour->new($test_args) };
+like( $err, qr/invalid keys.+?third/, 'invalid key dies' );
 
 isa_ok( $obj, 'Metabase::Fact::Hash' );
 
-lives_ok { $obj = FactFour->new(%$args) } "new( <list> ) doesn't die";
+is exception { $obj = FactFour->new(%$args) }, undef, "new( <list> ) doesn't die";
 
 isa_ok( $obj, 'Metabase::Fact::Hash' );
 ok( $obj->guid, "object has a GUID" );
