@@ -6,7 +6,7 @@ package Metabase::Fact::Hash;
 # VERSION
 
 use Carp ();
-use JSON 2 ();
+use JSON::MaybeXS ();
 
 use Metabase::Fact;
 our @ISA = qw/Metabase::Fact/;
@@ -31,12 +31,12 @@ sub validate_content {
 
 sub content_as_bytes {
     my ($self) = @_;
-    return JSON->new->ascii->encode( $self->content );
+    return JSON::MaybeXS->new(ascii => 1)->encode( $self->content );
 }
 
 sub content_from_bytes {
     my ( $class, $bytes ) = @_;
-    return JSON->new->ascii->decode($bytes);
+    return JSON::MaybeXS->new(ascii => 1)->decode($bytes);
 }
 
 1;

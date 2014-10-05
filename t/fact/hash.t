@@ -10,7 +10,7 @@ use warnings;
 use Data::GUID qw/guid_string/;
 use Test::More;
 use Test::Fatal;
-use JSON 2 ();
+use JSON::MaybeXS ();
 
 use lib 't/lib';
 
@@ -22,7 +22,7 @@ require_ok('FactSubclasses.pm');
 # fixtures
 #--------------------------------------------------------------------------#
 
-my $json = JSON->new->ascii;
+my $json = JSON::MaybeXS->new(ascii => 1);
 
 my ( $obj, $err );
 

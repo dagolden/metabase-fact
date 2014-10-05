@@ -6,7 +6,7 @@ package Metabase::Report;
 # VERSION
 
 use Carp ();
-use JSON 2 ();
+use JSON::MaybeXS ();
 
 use Metabase::Fact;
 our @ISA = qw/Metabase::Fact/;
@@ -127,7 +127,7 @@ sub content_as_bytes {
     Carp::confess("can't serialize an open report") unless $self->{__closed};
 
     my $content = [ map { $_->as_struct } @{ $self->content } ];
-    my $encoded = eval { JSON->new->ascii->encode($content) };
+    my $encoded = eval { JSON::MaybeXS->new(ascii => 1)->encode($content) };
     Carp::confess $@ if $@;
     return $encoded;
 }
@@ -136,7 +136,7 @@ sub content_from_bytes {
     my ( $self, $string ) = @_;
     $string = $$string if ref $string;
 
-    my $fact_structs = JSON->new->ascii->decode($string);
+    my $fact_structs = JSON::MaybeXS->new(ascii => 1)->decode($string);
 
     my @facts;
     for my $struct (@$fact_structs) {

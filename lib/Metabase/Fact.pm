@@ -7,7 +7,7 @@ package Metabase::Fact;
 
 use Carp ();
 use Data::GUID guid_string => { -as => '_guid' };
-use JSON 2 ();
+use JSON::MaybeXS ();
 use Metabase::Resource;
 
 #--------------------------------------------------------------------------#
@@ -309,12 +309,12 @@ sub from_struct {
 
 sub as_json {
     my ($self) = @_;
-    return JSON->new->ascii->encode( $self->as_struct );
+    return JSON::MaybeXS->new(ascii => 1)->encode( $self->as_struct );
 }
 
 sub from_json {
     my ( $class, $string ) = @_;
-    my $struct = eval { JSON->new->ascii->decode($string) }
+    my $struct = eval { JSON::MaybeXS->new(ascii => 1)->decode($string) }
       or Carp::confess "Error decoding JSON:\n$@";
     return $class->from_struct($struct);
 }

@@ -6,13 +6,13 @@ use Test::Fatal;
 use File::Spec;
 use File::Temp 0.20;
 use Cwd;
-use JSON 2 ();
+use JSON::MaybeXS ();
 
 #--------------------------------------------------------------------------#
 # fixtures
 #--------------------------------------------------------------------------#
 
-my $json = JSON->new->ascii;
+my $json = JSON::MaybeXS->new(ascii => 1);
 
 sub _compare {
     my ( $report1, $report2 ) = @_;
