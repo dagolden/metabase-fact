@@ -6,7 +6,8 @@ use warnings;
 package metabase_profile; # dzil needs this
 # PODNAME: metabase-profile
 # ABSTRACT: create a metabase profile
-# VERSION
+
+our $VERSION = '0.025';
 
 use Getopt::Long;
 use JSON::MaybeXS ();

@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 package Metabase::Resource::metabase::user;
-# VERSION
+
+our $VERSION = '0.025';
 
 use Metabase::Resource::metabase::fact;
 our @ISA = qw/Metabase::Resource::metabase::fact/;

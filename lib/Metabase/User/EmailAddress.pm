@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 package Metabase::User::EmailAddress;
-# VERSION
+
+our $VERSION = '0.025';
 
 use Metabase::Fact::String;
 our @ISA = qw/Metabase::Fact::String/;

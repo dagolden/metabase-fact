@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 package Metabase::Resource::cpan::distfile;
-# VERSION
+
+our $VERSION = '0.025';
 
 use Carp               ();
 use CPAN::DistnameInfo ();

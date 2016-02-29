@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 package Metabase::Resource::metabase::fact;
-# VERSION
+
+our $VERSION = '0.025';
 
 use Carp ();
 

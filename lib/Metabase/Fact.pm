@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 package Metabase::Fact;
-# VERSION
+
+our $VERSION = '0.025';
 
 use Carp ();
 use Data::GUID guid_string => { -as => '_guid' };

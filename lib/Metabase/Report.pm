@@ -3,7 +3,8 @@ use strict;
 use warnings;
 
 package Metabase::Report;
-# VERSION
+
+our $VERSION = '0.025';
 
 use Carp ();
 use JSON::MaybeXS ();
