@@ -2,6 +2,8 @@ Revision history for Metabase-Fact
 
 {{$NEXT}}
 
+0.025     2016-02-28 23:15:39-05:00 America/New_York
+
     [PREREQS]
 
     - Changed from JSON to JSON::MaybeXS to insulate this module

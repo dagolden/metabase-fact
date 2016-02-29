@@ -4,7 +4,7 @@ use warnings;
 
 package Metabase::Resource::cpan::distfile;
 
-our $VERSION = '0.025';
+our $VERSION = '0.026';
 
 use Carp               ();
 use CPAN::DistnameInfo ();

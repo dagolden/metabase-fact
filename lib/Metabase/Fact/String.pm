@@ -4,7 +4,7 @@ use warnings;
 
 package Metabase::Fact::String;
 
-our $VERSION = '0.025';
+our $VERSION = '0.026';
 
 use Carp ();
 

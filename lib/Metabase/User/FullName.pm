@@ -4,7 +4,7 @@ use warnings;
 
 package Metabase::User::FullName;
 
-our $VERSION = '0.025';
+our $VERSION = '0.026';
 
 use Metabase::Fact::String;
 our @ISA = qw/Metabase::Fact::String/;

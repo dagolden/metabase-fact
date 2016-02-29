@@ -4,7 +4,7 @@ use warnings;
 
 package Metabase::Fact::Hash;
 
-our $VERSION = '0.025';
+our $VERSION = '0.026';
 
 use Carp ();
 use JSON::MaybeXS ();

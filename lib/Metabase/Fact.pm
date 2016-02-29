@@ -4,7 +4,7 @@ use warnings;
 
 package Metabase::Fact;
 
-our $VERSION = '0.025';
+our $VERSION = '0.026';
 
 use Carp ();
 use Data::GUID guid_string => { -as => '_guid' };
