@@ -16,13 +16,14 @@ use Metabase::User::Secret;
 use Pod::Usage;
 use IO::Prompt::Tiny qw(prompt);
 
-my ( %profile, $help, $output, $full_name, $email_address, $password );
+my ( %profile, $help, $output, $full_name, $email_address, $password, $guid );
 my $result = GetOptions(
     'help|h'     => \$help,
     'output|o:s' => \$output,
     'name:s'     => \$full_name,
     'email:s'    => \$email_address,
     'secret:s'   => \$password,
+    'guid:s'     => \$guid,
 );
 
 pod2usage( { -verbose => 2 } ) if !$result || $help;
@@ -39,6 +40,7 @@ if ( -f $output ) {
 $profile{full_name}     = $full_name     if defined $full_name;
 $profile{email_address} = $email_address if defined $email_address;
 $profile{password}      = $password      if defined $password;
+$profile{guid}          = $guid          if defined $guid;
 
 my @prompts = (
     full_name     => 'full name',
@@ -90,6 +92,7 @@ Valid options include:
       --name    FULLNAME  full user name, eg "John Doe"
   -o, --output  FILENAME  output filename
       --secret  PASSWORD  password for authentication
+      --guid    GUID      use previously generated GUID
   -h, --help              print man page
 
 If no output file name is given, the default name 'metabase_id.json' will be
@@ -106,6 +109,9 @@ Use the resulting file according to the instructions of your Metabase
 client program. You may wish to copy it across computers if you would like
 to be identified consistently when submitting reports from different
 locations.
+
+If you already created a metabase profile before and just want to regenerate
+the file use --guid option.
 
 =cut
 
