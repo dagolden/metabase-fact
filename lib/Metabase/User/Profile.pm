@@ -25,11 +25,12 @@ sub create {
         {
             full_name     => 1,
             email_address => 1,
+            guid          => 0,
         }
     );
 
     # resource string must reference our own guid, so pregenerate it
-    my $guid    = lc _guid();
+    my $guid    = lc($args->{guid} || _guid());
     my $profile = $class->open(
         guid     => $guid,
         resource => "metabase:user:$guid",
